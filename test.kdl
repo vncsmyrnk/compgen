@@ -1,0 +1,13 @@
+name "mytool"
+help "A sample CLI tool for testing completions"
+
+flag "-v --verbose" help="Enable verbose output"
+flag "-p --port <PORT>" help="Specify a port number"
+
+arg "<action>" help="The action to perform" {
+    choices "start" "stop" "restart"
+}
+
+cmd "deploy" help="Deploy the system" {
+    flag "-f --force" help="Bypass safety checks"
+}

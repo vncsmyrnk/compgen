@@ -1,0 +1,10 @@
+name "mytool"
+bin "mytool"
+help "A simple testing utility"
+
+flag "-v --verbose" help="Enable verbose logging"
+flag "-p --port <PORT>" help="Specify the port"
+
+cmd "start" help="Start the server" {
+    flag "-d --daemon" help="Run in background"
+}
