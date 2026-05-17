@@ -138,20 +138,20 @@ int main(void) {
                     current_cmd->help = safe_strdup(val);
                 } else if (strcmp(current_node_type, "flag") == 0 &&
                            current_flag) {
-                    if (strstr(val, "-v"))
-                        current_flag->short_name = safe_strdup("-v");
-                    if (strstr(val, "-p"))
-                        current_flag->short_name = safe_strdup("-p");
-                    if (strstr(val, "-f"))
-                        current_flag->short_name = safe_strdup("-f");
-                    if (strstr(val, "--verbose"))
-                        current_flag->long_name = safe_strdup("--verbose");
-                    if (strstr(val, "--port"))
-                        current_flag->long_name = safe_strdup("--port");
-                    if (strstr(val, "--force"))
-                        current_flag->long_name = safe_strdup("--force");
-                    if (strstr(val, "<PORT>"))
-                        current_flag->value_name = safe_strdup("<PORT>");
+                    char *token = strtok(val, " \t");
+
+                    while (token != NULL) {
+                        if (strncmp(token, "--", 2) == 0) {
+                            current_flag->long_name = safe_strdup(token);
+                        } else if (token[0] == '-') {
+                            current_flag->short_name = safe_strdup(token);
+                        } else if (token[0] == '<' &&
+                                   token[strlen(token) - 1] == '>') {
+                            current_flag->value_name = safe_strdup(token);
+                        }
+
+                        token = strtok(NULL, " \t");
+                    }
                 } else if (strcmp(current_node_type, "arg") == 0 &&
                            current_arg) {
                     current_arg->name = safe_strdup(val);
