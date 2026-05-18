@@ -14,6 +14,14 @@
 
 This project's intent is to also define a specification for the completion generation. Inspiring on [usage's KDL spec](https://usage.jdx.dev/spec/), a detailed specification and scoped specifically to completion generation (ignoring help and other runtime features) is at [docs/spec.md](docs/spec.md).
 
+## Roadmap
+
+- [x] KDL specification for commands, flags and arguments
+- [ ] KDL parsing and AST implementation
+- [ ] Completion generation for a particular shell, generic enough to expect future implementations for other shells
+- [ ] Document usage for users
+- [ ] Document requirements and guidelines and for more shells
+
 ## Building from source
 
 ```
