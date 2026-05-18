@@ -6,6 +6,6 @@
 
 // The main entry point for the Zsh generator.
 // Takes the root AST node and writes the shell script into the buffer.
-void generate_zsh(Command *root, StringBuffer *out);
+void generate_zsh(ASTCommand *root, StringBuffer *out);
 
 #endif // GEN_ZSH_H

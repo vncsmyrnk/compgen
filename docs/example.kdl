@@ -1,10 +1,35 @@
 name "mytool"
-bin "mytool"
-help "A simple testing utility"
+help "A sample CLI tool for testing completions"
 
-flag "-v --verbose" help="Enable verbose logging"
-flag "-p --port <PORT>" help="Specify the port"
+cmd "backup" help="The action to perform" {
+    cmd "generate" help="help for generate" {
+        flag "-h --help" help="Display help"
+        flag "-o --to-stdout" help="Prints script"
+    }
+    cmd "remote" help="help for remote" {
+        cmd "list" help="help for list" {
+            flag "-h --help" help="Display help"
+            flag "-o --to-stdout" help="Prints script"
+        }
+        cmd "unwrap" help="help for list" {
+            flag "-h --help" help="Display help"
+            flag "-o --to-stdout" help="Prints script"
+            flag "-l --latest" help="Fetches latest script"
 
-cmd "start" help="Start the server" {
-    flag "-d --daemon" help="Run in background"
+            arg "backup_name" help="The backup file name"
+        }
+    }
+}
+
+cmd "containers" help="help for containers" {
+    cmd "list" help="help for list" {
+        flag "-h --help" help="Display help"
+        flag "-o --to-stdout" help="Prints script"
+        flag "-n --no-headings" help="Hide headings"
+    }
+    cmd "mount" help="help for list" {
+        flag "-h --help" help="Display help"
+        flag "-o --to-stdout" help="Prints script"
+        arg "<file>" help="container image file"
+    }
 }

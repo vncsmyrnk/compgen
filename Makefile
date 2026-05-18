@@ -20,8 +20,9 @@ INSTALL_PROGRAM = $(INSTALL)
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS) | out
-	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
+$(TARGET): $(OBJS)
+	@mkdir -p $(OUTPUT)
+	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDLIBS)
 
 .PHONY: install
 install: all
@@ -31,10 +32,6 @@ install: all
 .PHONY:
 check:
 	clang-format --dry-run --Werror $(SRCS)
-
-.PHONY: out
-out:
-	@mkdir -p $(OUTPUT)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@

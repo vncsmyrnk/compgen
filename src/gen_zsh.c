@@ -1,4 +1,5 @@
 #include "gen_zsh.h"
+#include "ast.h"
 #include <stdio.h>
 
 static void indent(StringBuffer *out, int level) {
@@ -28,18 +29,21 @@ static void gen_single_flag(Flag *f, const char *flag_name, StringBuffer *out) {
 }
 
 // Recursive function to generate Zsh for a command and all its children
-static void gen_cmd_function(Command *cmd, const char *func_name,
+static void gen_cmd_function(ASTCommand *c, const char *func_name,
                              StringBuffer *out) {
-    if (!cmd)
+    if (!c || !c->cmd)
         return;
 
+    Command *cmd = c->cmd;
+
     // 1. Recursively generate child subcommands FIRST
-    Command *sub = cmd->subcommands;
-    while (sub) {
+    ASTCommand *sub = c->child;
+    while (sub && sub->cmd) {
         char sub_func[256];
-        snprintf(sub_func, sizeof(sub_func), "%s_%s", func_name, sub->name);
+        snprintf(sub_func, sizeof(sub_func), "%s_%s", func_name,
+                 sub->cmd->name);
         gen_cmd_function(sub, sub_func, out);
-        sub = sub->next;
+        sub = sub->sibling;
     }
 
     // 2. Generate the function for THIS command
@@ -75,7 +79,7 @@ static void gen_cmd_function(Command *cmd, const char *func_name,
     // --- STATE: action (Suggest static choices AND subcommand names) ---
     indent(out, 2);
     sb_append(out, "action)\n");
-    if ((cmd->args && cmd->args->choice_count > 0) || cmd->subcommands) {
+    if ((cmd->args && cmd->args->choice_count > 0) || c->child) {
         indent(out, 3);
         sb_append(out, "local -a choices\n");
         indent(out, 3);
@@ -90,15 +94,15 @@ static void gen_cmd_function(Command *cmd, const char *func_name,
         }
 
         // Add Subcommands (e.g., deploy:Deploy the system)
-        sub = cmd->subcommands;
-        while (sub) {
+        sub = c->child;
+        while (sub && sub->cmd) {
             indent(out, 4);
-            if (sub->help) {
-                sb_appendf(out, "'%s:%s'\n", sub->name, sub->help);
+            if (sub->cmd->help) {
+                sb_appendf(out, "'%s:%s'\n", sub->cmd->name, sub->cmd->help);
             } else {
-                sb_appendf(out, "'%s'\n", sub->name);
+                sb_appendf(out, "'%s'\n", sub->cmd->name);
             }
-            sub = sub->next;
+            sub = sub->sibling;
         }
 
         indent(out, 3);
@@ -110,21 +114,22 @@ static void gen_cmd_function(Command *cmd, const char *func_name,
     sb_append(out, ";;\n");
 
     // --- STATE: args (Dispatch to subcommand functions) ---
-    if (cmd->subcommands) {
+    if (c->child) {
         indent(out, 2);
         sb_append(out, "args)\n");
         indent(out, 3);
         sb_append(out, "case $line[1] in\n");
 
-        sub = cmd->subcommands;
-        while (sub) {
+        sub = c->child;
+        while (sub && sub->cmd) {
             indent(out, 4);
-            sb_appendf(out, "%s)\n", sub->name);
+            sb_appendf(out, "%s)\n", sub->cmd->name);
             indent(out, 5);
-            sb_appendf(out, "_%s_%s \"$@\" && ret=0\n", func_name, sub->name);
+            sb_appendf(out, "_%s_%s \"$@\" && ret=0\n", func_name,
+                       sub->cmd->name);
             indent(out, 5);
             sb_append(out, ";;\n");
-            sub = sub->next;
+            sub = sub->sibling;
         }
 
         indent(out, 3);
@@ -140,22 +145,24 @@ static void gen_cmd_function(Command *cmd, const char *func_name,
     sb_append(out, "}\n\n");
 }
 
-void generate_zsh(Command *root, StringBuffer *out) {
-    if (!root || !root->name)
+void generate_zsh(ASTCommand *root, StringBuffer *out) {
+    if (!root || !root->cmd)
         return;
 
-    sb_appendf(out, "#compdef %s\n\n", root->name);
+    char *name = root->cmd->name;
+
+    sb_appendf(out, "#compdef %s\n\n", name);
     sb_append(out, "# This script was generated automatically\n\n");
 
     // Start the recursive generation
-    gen_cmd_function(root, root->name, out);
+    gen_cmd_function(root, name, out);
 
     // The Execution Footer
-    sb_appendf(out, "if [ \"$funcstack[1]\" = \"_%s\" ]; then\n", root->name);
+    sb_appendf(out, "if [ \"$funcstack[1]\" = \"_%s\" ]; then\n", name);
     indent(out, 1);
-    sb_appendf(out, "_%s \"$@\"\n", root->name);
+    sb_appendf(out, "_%s \"$@\"\n", name);
     sb_append(out, "else\n");
     indent(out, 1);
-    sb_appendf(out, "compdef _%s %s\n", root->name, root->name);
+    sb_appendf(out, "compdef _%s %s\n", name, name);
     sb_append(out, "fi\n");
 }
