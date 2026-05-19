@@ -24,6 +24,12 @@ This project's intent is to also define a specification for the completion gener
 
 ## Building from source
 
-```
+```sh
 make
+```
+
+## Running tests
+
+```sh
+make check
 ```

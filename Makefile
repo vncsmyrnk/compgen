@@ -5,6 +5,7 @@ LDLIBS = -lm
 
 SRCDIR = .
 SRCS = $(wildcard $(SRCDIR)/src/*.c) $(wildcard $(SRCDIR)/vendor/ckdl/src/*.c)
+ALL_SRCS = $(wildcard $(SRCDIR)/src/*.c) $(wildcard $(SRCDIR)/vendor/ckdl/src/*.c) $(wildcard $(SRCDIR)/test/*.c)
 OBJS = $(SRCS:.c=.o)
 
 OUTPUT = $(SRCDIR)/.out
@@ -18,6 +19,10 @@ BINDIR = $(PREFIX)/bin
 INSTALL ?= install
 INSTALL_PROGRAM = $(INSTALL)
 
+TEST_BIN = $(OUTPUT)/test_runner
+TEST_SRCS = $(wildcard $(SRCDIR)/test/*.c) $(filter-out $(SRCDIR)/src/main.c, $(SRCS))
+TEST_OBJS = $(TEST_SRCS:.c=.o)
+
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
@@ -29,9 +34,21 @@ install: all
 	$(INSTALL) -d $(DESTDIR)$(BINDIR)
 	$(INSTALL_PROGRAM) $(TARGET) $(DESTDIR)$(BINDIR)
 
-.PHONY:
-check:
-	clang-format --dry-run --Werror $(SRCS)
+$(TEST_BIN): $(TEST_OBJS)
+	@mkdir -p $(OUTPUT)
+	$(CC) $(CFLAGS) -o $@ $(TEST_OBJS) $(LDLIBS)
+
+.PHONY: test
+check: all $(TEST_BIN)
+	./$(TEST_BIN)
+
+.PHONY: lint
+lint:
+	clang-format --dry-run --Werror $(ALL_SRCS)
+
+.PHONY: format
+format:
+	clang-format -i $(ALL_SRCS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
