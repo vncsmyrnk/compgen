@@ -2,7 +2,7 @@
 #include "string.h"
 #include <stdlib.h>
 
-Command *node_create_command(const char *name) {
+Command *node_create_cmd(const char *name) {
     Command *cmd = calloc(1, sizeof(Command));
     if (cmd && name) {
         cmd->name = safe_strdup(name);

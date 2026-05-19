@@ -53,7 +53,7 @@ typedef struct {
     } as;
 } Node;
 
-Command *node_create_command(const char *name);
+Command *node_create_cmd(const char *name);
 Flag *node_create_flag(void);
 Arg *node_create_arg(const char *name);
 void node_flag_add_choice(Arg *arg, const char *choice);

@@ -12,9 +12,9 @@ typedef struct ASTCommand {
 
 void ast_init(Command *cmd);
 void ast_add_cmd(Command *cmd);
-void ast_rebase();
-ASTCommand *ast_root();
-void ast_free();
-void ast_debug_print();
+void ast_rebase(void);
+ASTCommand *ast_root(void);
+void ast_free(void);
+void ast_debug_print(void);
 
 #endif // AST_H

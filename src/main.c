@@ -41,7 +41,7 @@ int main(void) {
 
     kdl_event_data *event;
 
-    Command *root_cmd = node_create_command("root");
+    Command *root_cmd = node_create_cmd("root");
     ast_init(root_cmd);
     Command *current_cmd = root_cmd;
 
@@ -62,7 +62,7 @@ int main(void) {
             snprintf(current_node_type, sizeof(current_node_type), "%.*s",
                      (int)event->name.len, event->name.data);
             if (strcmp(current_node_type, "cmd") == 0) {
-                Command *new_cmd = node_create_command(NULL);
+                Command *new_cmd = node_create_cmd(NULL);
                 nstack_push_cmd(new_cmd);
                 ast_add_cmd(new_cmd);
                 current_cmd = new_cmd;
