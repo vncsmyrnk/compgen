@@ -1,5 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -g -O0 -fsanitize=address -fno-omit-frame-pointer
+CFLAGS = -Wall -Wextra -std=c11 -g -O2
+CFLAGS_TEST = -Wall -Wextra -std=c11 -g -O0 -fsanitize=address -fno-omit-frame-pointer
 INCLUDES = -Ivendor/ckdl/include
 LDLIBS = -lm
 
@@ -36,7 +37,7 @@ install: all
 
 $(TEST_BIN): $(TEST_OBJS)
 	@mkdir -p $(OUTPUT)
-	$(CC) $(CFLAGS) -o $@ $(TEST_OBJS) $(LDLIBS)
+	$(CC) $(CFLAGS_TEST) -o $@ $(TEST_OBJS) $(LDLIBS)
 
 .PHONY: test
 check: all $(TEST_BIN)

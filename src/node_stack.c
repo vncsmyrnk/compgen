@@ -1,42 +1,74 @@
 #include "node_stack.h"
 #include "ast.h"
 #include <stddef.h>
+#include <stdlib.h>
 
-#define MAX_DEPTH 128
+typedef struct NodeStackItem {
+    Node *node;
+    struct NodeStackItem *next;
+} NodeStackItem;
 
-Node stack[MAX_DEPTH];
-int stack_ptr = 0;
+struct NodeStack {
+    NodeStackItem *top;
+};
 
-void nstack_push_cmd(Command *c) {
-    if (stack_ptr >= MAX_DEPTH)
+NodeStack *node_stack_init() { return calloc(1, sizeof(NodeStack)); }
+
+void node_stack_push_item(NodeStack *s, NodeStackItem *i) {
+    if (!s->top) {
+        s->top = i;
         return;
-    stack[stack_ptr].type = NODE_CMD;
-    stack[stack_ptr].as.cmd = c;
-    stack_ptr++;
-}
-
-void nstack_push_arg(Arg *a) {
-    if (stack_ptr >= MAX_DEPTH)
-        return;
-    stack[stack_ptr].type = NODE_ARG;
-    stack[stack_ptr].as.arg = a;
-    stack_ptr++;
-}
-
-void nstack_push_flag(Flag *f) {
-    if (stack_ptr >= MAX_DEPTH)
-        return;
-    stack[stack_ptr].type = NODE_FLAG;
-    stack[stack_ptr].as.flag = f;
-    stack_ptr++;
-}
-
-Node nstack_pop() {
-    if (stack_ptr > 0) {
-        stack_ptr--;
-        return stack[stack_ptr];
     }
-    // Return a safe default if underflow occurs
-    Node empty = {NODE_CMD, .as.cmd = NULL};
-    return empty;
+    i->next = s->top;
+    s->top = i;
+}
+
+void node_stack_push_cmd(NodeStack *s, Command *c) {
+    NodeStackItem *i = calloc(1, sizeof(NodeStackItem));
+    Node *n = calloc(1, sizeof(Node));
+    n->type = NODE_CMD;
+    n->as.cmd = c;
+    i->node = n;
+    node_stack_push_item(s, i);
+}
+
+void node_stack_push_arg(NodeStack *s, Arg *a) {
+    NodeStackItem *i = calloc(1, sizeof(NodeStackItem));
+    Node *n = calloc(1, sizeof(Node));
+    n->type = NODE_ARG;
+    n->as.arg = a;
+    i->node = n;
+    node_stack_push_item(s, i);
+}
+
+void node_stack_push_flag(NodeStack *s, Flag *f) {
+    NodeStackItem *i = calloc(1, sizeof(NodeStackItem));
+    Node *n = calloc(1, sizeof(Node));
+    n->type = NODE_FLAG;
+    n->as.flag = f;
+    i->node = n;
+    node_stack_push_item(s, i);
+}
+
+Node *node_stack_pop(NodeStack *s) {
+    if (!s->top) {
+        return NULL;
+    }
+    Node *top_node = s->top->node;
+    NodeStackItem *current_top = s->top;
+    s->top = s->top->next;
+    free(current_top);
+    return top_node;
+}
+
+Node *node_stack_free(NodeStack *s) {
+    if (!s) {
+        return NULL;
+    }
+    while (s->top) {
+        Node *n = node_stack_pop(s);
+        free(n);
+    }
+    free(s);
+    return NULL;
 }

@@ -53,6 +53,8 @@ ParseResult kdl_parse_file(const char *filepath) {
     Arg *current_arg = NULL;
     char current_node_type[32] = {0};
 
+    NodeStack *node_stack = node_stack_init();
+
     while ((event = kdl_parser_next_event(parser)) != NULL) {
         if (event->event == KDL_EVENT_EOF)
             break;
@@ -67,17 +69,17 @@ ParseResult kdl_parse_file(const char *filepath) {
                      (int)event->name.len, event->name.data);
             if (strcmp(current_node_type, "cmd") == 0) {
                 Command *new_cmd = node_create_cmd(NULL);
-                nstack_push_cmd(new_cmd);
+                node_stack_push_cmd(node_stack, new_cmd);
                 ast_append(ast, new_cmd);
                 current_cmd = new_cmd;
             } else if (strcmp(current_node_type, "flag") == 0) {
                 current_flag = node_create_flag();
-                nstack_push_flag(current_flag);
+                node_stack_push_flag(node_stack, current_flag);
                 current_flag->next = current_cmd->flags;
                 current_cmd->flags = current_flag;
             } else if (strcmp(current_node_type, "arg") == 0) {
                 current_arg = node_create_arg(NULL);
-                nstack_push_arg(current_arg);
+                node_stack_push_arg(node_stack, current_arg);
                 Arg *a = current_cmd->args;
                 if (!a) {
                     current_cmd->args = current_arg;
@@ -161,10 +163,11 @@ ParseResult kdl_parse_file(const char *filepath) {
             break;
 
         case KDL_EVENT_END_NODE:
-            Node last_closed_node = nstack_pop();
-            if (last_closed_node.type == NODE_CMD && last_closed_node.as.cmd) {
+            Node *last_closed_node = node_stack_pop(node_stack);
+            if (last_closed_node && last_closed_node->type == NODE_CMD) {
                 ast_rebase(ast);
             }
+            free(last_closed_node);
             break;
 
         case KDL_EVENT_PARSE_ERROR:
@@ -178,6 +181,7 @@ ParseResult kdl_parse_file(const char *filepath) {
 
     kdl_destroy_parser(parser);
     free(kdl_text);
+    node_stack_free(node_stack);
 
     return res;
 }
