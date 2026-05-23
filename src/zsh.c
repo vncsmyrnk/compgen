@@ -1,5 +1,5 @@
-#include "shell.h"
 #include "ast.h"
+#include "shell.h"
 #include <stdio.h>
 
 static void indent(StringBuffer *out, int level) {
@@ -59,13 +59,47 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
     indent(out, 1);
     sb_append(out, "_arguments -C \\\n");
 
-    Flag *f = cmd->flags;
-    while (f) {
-        if (f->short_name)
-            gen_single_flag(f, f->short_name, out);
-        if (f->long_name)
-            gen_single_flag(f, f->long_name, out);
-        f = f->next;
+    if (!c->child) {
+        Flag *f = cmd->flags;
+        while (f) {
+            if (f->short_name)
+                gen_single_flag(f, f->short_name, out);
+            if (f->long_name)
+                gen_single_flag(f, f->long_name, out);
+            f = f->next;
+        }
+
+        Arg *a = cmd->args;
+        int arg_index = 1;
+        while (a) {
+            switch (a->type) {
+            case ARG_TYPE_INT:
+                indent(out, 2);
+                sb_appendf(out, "'%d:%s:_guard \"[0-9]#\"' \\\n", arg_index,
+                           a->help);
+                break;
+            case ARG_TYPE_FILE:
+                indent(out, 2);
+                sb_appendf(out, "'%d:%s:_files' \\\n", arg_index, a->help);
+                break;
+            case ARG_TYPE_DIR:
+                indent(out, 2);
+                sb_appendf(out, "'%d:%s:_files -/' \\\n", arg_index, a->help);
+                break;
+            default:
+                indent(out, 2);
+                sb_appendf(out, "'%d:%s:' \\\n", arg_index, a->help);
+            }
+            arg_index++;
+            a = a->next;
+        }
+        indent(out, 2);
+        sb_append(out, "'*:: :->args' && ret=0\n\n");
+
+        indent(out, 1);
+        sb_append(out, "return ret\n");
+        sb_append(out, "}\n\n");
+        return;
     }
 
     indent(out, 2);
@@ -76,67 +110,53 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
     indent(out, 1);
     sb_append(out, "case $state in\n");
 
-    // --- STATE: action (Suggest static choices AND subcommand names) ---
     indent(out, 2);
     sb_append(out, "action)\n");
-    if ((cmd->args && cmd->args->choice_count > 0) || c->child) {
-        indent(out, 3);
-        sb_append(out, "local -a choices\n");
-        indent(out, 3);
-        sb_append(out, "choices=(\n");
 
-        // Add static choices (e.g., start, stop, restart)
-        if (cmd->args) {
-            for (int i = 0; i < cmd->args->choice_count; i++) {
-                indent(out, 4);
-                sb_appendf(out, "'%s'\n", cmd->args->choices[i]);
-            }
+    indent(out, 3);
+    sb_append(out, "local -a choices\n");
+    indent(out, 3);
+    sb_append(out, "choices=(\n");
+
+    sub = c->child;
+    while (sub && sub->cmd) {
+        indent(out, 4);
+        if (sub->cmd->help) {
+            sb_appendf(out, "'%s:%s'\n", sub->cmd->name, sub->cmd->help);
+        } else {
+            sb_appendf(out, "'%s'\n", sub->cmd->name);
         }
-
-        // Add Subcommands (e.g., deploy:Deploy the system)
-        sub = c->child;
-        while (sub && sub->cmd) {
-            indent(out, 4);
-            if (sub->cmd->help) {
-                sb_appendf(out, "'%s:%s'\n", sub->cmd->name, sub->cmd->help);
-            } else {
-                sb_appendf(out, "'%s'\n", sub->cmd->name);
-            }
-            sub = sub->sibling;
-        }
-
-        indent(out, 3);
-        sb_append(out, ")\n");
-        indent(out, 3);
-        sb_appendf(out, "_describe 'commands' choices && ret=0\n");
+        sub = sub->sibling;
     }
+
+    indent(out, 3);
+    sb_append(out, ")\n");
+    indent(out, 3);
+    sb_appendf(out, "_describe 'commands' choices && ret=0\n");
+
     indent(out, 3);
     sb_append(out, ";;\n");
 
-    // --- STATE: args (Dispatch to subcommand functions) ---
-    if (c->child) {
-        indent(out, 2);
-        sb_append(out, "args)\n");
-        indent(out, 3);
-        sb_append(out, "case $line[1] in\n");
+    indent(out, 2);
+    sb_append(out, "args)\n");
+    indent(out, 3);
+    sb_append(out, "case $line[1] in\n");
 
-        sub = c->child;
-        while (sub && sub->cmd) {
-            indent(out, 4);
-            sb_appendf(out, "%s)\n", sub->cmd->name);
-            indent(out, 5);
-            sb_appendf(out, "_%s_%s \"$@\" && ret=0\n", func_name,
-                       sub->cmd->name);
-            indent(out, 5);
-            sb_append(out, ";;\n");
-            sub = sub->sibling;
-        }
-
-        indent(out, 3);
-        sb_append(out, "esac\n");
-        indent(out, 3);
+    sub = c->child;
+    while (sub && sub->cmd) {
+        indent(out, 4);
+        sb_appendf(out, "%s)\n", sub->cmd->name);
+        indent(out, 5);
+        sb_appendf(out, "_%s_%s \"$@\" && ret=0\n", func_name, sub->cmd->name);
+        indent(out, 5);
         sb_append(out, ";;\n");
+        sub = sub->sibling;
     }
+
+    indent(out, 3);
+    sb_append(out, "esac\n");
+    indent(out, 3);
+    sb_append(out, ";;\n");
 
     indent(out, 1);
     sb_append(out, "esac\n\n");
@@ -145,7 +165,7 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
     sb_append(out, "}\n\n");
 }
 
-void generate_zsh(ASTCommand *root, StringBuffer *out) {
+void generate(ASTCommand *root, StringBuffer *out) {
     if (!root || !root->cmd)
         return;
 

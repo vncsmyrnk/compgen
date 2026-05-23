@@ -1,6 +1,6 @@
-#include "test.h"
 #include "../src/ast.h"
 #include "../src/node.h"
+#include "test.h"
 
 TEST(ast_add_command) {
     Command *cmd = node_create_cmd("root");

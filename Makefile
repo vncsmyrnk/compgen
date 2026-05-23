@@ -55,5 +55,5 @@ format:
 
 .PHONY: clean
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(TARGET) $(TEST_OBJS)
 	rm -rf $(OUTPUT)
