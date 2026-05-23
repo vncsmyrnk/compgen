@@ -24,7 +24,7 @@ int main(void) {
     }
 
     StringBuffer zsh_code = sb_create();
-    generate(ast_root(), &zsh_code);
+    generate(ast_root(r.ast), &zsh_code);
     printf("%s\n", zsh_code.data);
 
     sb_free(&zsh_code);

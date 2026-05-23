@@ -10,11 +10,13 @@ typedef struct ASTCommand {
     Command *cmd;
 } ASTCommand;
 
-void ast_init(Command *cmd);
-void ast_add_cmd(Command *cmd);
-void ast_rebase(void);
-ASTCommand *ast_root(void);
-void ast_free(void);
-void ast_debug_print(void);
+typedef struct AST AST;
+
+AST *ast_init(Command *cmd_root);
+void ast_append(AST *ast, Command *cmd);
+void ast_rebase(AST *ast);
+ASTCommand *ast_root(AST *ast);
+void ast_free(AST *ast);
+void ast_debug_print(AST *ast);
 
 #endif // AST_H

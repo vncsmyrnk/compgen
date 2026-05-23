@@ -26,7 +26,8 @@ char *read_file(const char *filename) {
 }
 
 ParseResult kdl_parse_file(const char *filepath) {
-    ParseResult res = {.ast_cmd = NULL, .status = KDL_RESULT_OK};
+    AST *ast = ast_init(NULL);
+    ParseResult res = {.ast = ast, .status = KDL_RESULT_OK};
 
     char *kdl_text = read_file(filepath);
     if (!kdl_text) {
@@ -45,7 +46,7 @@ ParseResult kdl_parse_file(const char *filepath) {
     kdl_event_data *event;
 
     Command *root_cmd = node_create_cmd("root");
-    ast_init(root_cmd);
+    ast_append(ast, root_cmd);
     Command *current_cmd = root_cmd;
 
     Flag *current_flag = NULL;
@@ -67,7 +68,7 @@ ParseResult kdl_parse_file(const char *filepath) {
             if (strcmp(current_node_type, "cmd") == 0) {
                 Command *new_cmd = node_create_cmd(NULL);
                 nstack_push_cmd(new_cmd);
-                ast_add_cmd(new_cmd);
+                ast_append(ast, new_cmd);
                 current_cmd = new_cmd;
             } else if (strcmp(current_node_type, "flag") == 0) {
                 current_flag = node_create_flag();
@@ -163,7 +164,7 @@ ParseResult kdl_parse_file(const char *filepath) {
         case KDL_EVENT_END_NODE:
             Node last_closed_node = nstack_pop();
             if (last_closed_node.type == NODE_CMD && last_closed_node.as.cmd) {
-                ast_rebase();
+                ast_rebase(ast);
             }
             break;
 
@@ -179,9 +180,7 @@ ParseResult kdl_parse_file(const char *filepath) {
     kdl_destroy_parser(parser);
     free(kdl_text);
 
-    // ast_debug_print();
-    res.ast_cmd = ast_root();
     return res;
 }
 
-void kdl_free_result(ParseResult *r) { ast_free(); }
+void kdl_free_result(ParseResult *r) { ast_free(r->ast); }

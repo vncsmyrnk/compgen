@@ -5,53 +5,76 @@
 #include <stdlib.h>
 #include <string.h>
 
-ASTCommand *root = NULL;
-ASTCommand *current = NULL;
+struct AST {
+    ASTCommand *root;
+    ASTCommand *current;
+};
 
-void ast_init(Command *cmd) {
+AST *ast_init(Command *cmd_root) {
+    AST *ast = calloc(1, sizeof(AST));
+    if (!ast) {
+        return NULL;
+    }
+
+    if (!cmd_root) {
+        return ast;
+    }
+
     ASTCommand *c = calloc(1, sizeof(ASTCommand));
     if (!c) {
-        return;
+        free(ast);
+        return NULL;
     }
-    c->cmd = cmd;
-    root = c;
-    current = root;
+    c->cmd = cmd_root;
+
+    ast->root = c;
+    ast->current = ast->root;
+    return ast;
 }
 
-void ast_add_cmd(Command *cmd) {
+void ast_append(AST *ast, Command *cmd) {
+    if (!ast) {
+        return;
+    }
+
     ASTCommand *c = calloc(1, sizeof(ASTCommand));
     if (!c) {
         return;
     }
     c->cmd = cmd;
-    if (!root) {
-        root = c;
-        current = root;
+
+    if (!ast->root) {
+        ast->root = c;
+        ast->current = ast->root;
         return;
     }
+    c->parent = ast->current;
 
-    c->parent = current;
-
-    if (!current->child) {
-        current->child = c;
+    if (!ast->current->child) {
+        ast->current->child = c;
     } else {
-        ASTCommand *sibling = current->child;
+        ASTCommand *sibling = ast->current->child;
         while (sibling->sibling) {
             sibling = sibling->sibling;
         }
         sibling->sibling = c;
     }
 
-    current = c;
+    ast->current = c;
 }
 
-void ast_rebase(void) {
-    if (current && current->parent) {
-        current = current->parent;
+void ast_rebase(AST *ast) {
+    if (ast->current && ast->current->parent) {
+        ast->current = ast->current->parent;
     }
 }
 
-ASTCommand *ast_root(void) { return root; }
+ASTCommand *ast_root(AST *ast) {
+    if (ast) {
+        return ast->root;
+    }
+    return NULL;
+}
 
 void _ast_debug_print(ASTCommand *c, int indent, StringBuffer *out) {
     while (c) {
@@ -64,9 +87,9 @@ void _ast_debug_print(ASTCommand *c, int indent, StringBuffer *out) {
     }
 }
 
-void ast_debug_print(void) {
+void ast_debug_print(AST *ast) {
     StringBuffer s = sb_create();
-    _ast_debug_print(root, 0, &s);
+    _ast_debug_print(ast->root, 0, &s);
     fprintf(stderr, "%s", s.data);
     sb_free(&s);
 }
@@ -85,8 +108,9 @@ static void _ast_free_recursive(ASTCommand *c) {
     free(c);
 }
 
-void ast_free(void) {
-    _ast_free_recursive(root);
-    root = NULL;
-    current = NULL;
+void ast_free(AST *ast) {
+    if (!ast)
+        return;
+    _ast_free_recursive(ast->root);
+    free(ast);
 }

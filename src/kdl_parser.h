@@ -11,7 +11,7 @@ typedef enum {
 } ParseResultStatus;
 
 typedef struct {
-    ASTCommand *ast_cmd;
+    AST *ast;
     ParseResultStatus status;
 } ParseResult;
 
