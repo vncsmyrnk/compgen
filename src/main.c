@@ -1,5 +1,5 @@
 #include "ast.h"
-#include "gen_zsh.h"
+#include "zsh.h"
 #include "node_stack.h"
 #include "string.h"
 #include "string_builder.h"
