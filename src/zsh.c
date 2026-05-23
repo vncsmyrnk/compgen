@@ -1,4 +1,5 @@
 #include "ast.h"
+#include "node_list.h"
 #include "shell.h"
 #include <stdio.h>
 
@@ -28,25 +29,37 @@ static void gen_single_flag(Flag *f, const char *flag_name, StringBuffer *out) {
     sb_append(out, "' \\\n");
 }
 
-// Recursive function to generate Zsh for a command and all its children
+static void gen_flag(Flag *f, StringBuffer *out) {
+    if (f->short_name)
+        gen_single_flag(f, f->short_name, out);
+    if (f->long_name)
+        gen_single_flag(f, f->long_name, out);
+}
+
 static void gen_cmd_function(ASTCommand *c, const char *func_name,
-                             StringBuffer *out) {
-    if (!c || !c->cmd)
+                             NodeList *global_nodes_list, StringBuffer *out) {
+    if (!c || !c->cmd) {
         return;
+    }
 
     Command *cmd = c->cmd;
+    Flag *f = cmd->flags;
+    while (f) {
+        if (f->global) {
+            node_list_push_flag(global_nodes_list, f);
+        }
+        f = f->next;
+    }
 
-    // 1. Recursively generate child subcommands FIRST
     ASTCommand *sub = c->child;
     while (sub && sub->cmd) {
         char sub_func[256];
         snprintf(sub_func, sizeof(sub_func), "%s_%s", func_name,
                  sub->cmd->name);
-        gen_cmd_function(sub, sub_func, out);
+        gen_cmd_function(sub, sub_func, global_nodes_list, out);
         sub = sub->sibling;
     }
 
-    // 2. Generate the function for THIS command
     sb_appendf(out, "function _%s() {\n", func_name);
 
     indent(out, 1);
@@ -62,11 +75,15 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
     if (!c->child) {
         Flag *f = cmd->flags;
         while (f) {
-            if (f->short_name)
-                gen_single_flag(f, f->short_name, out);
-            if (f->long_name)
-                gen_single_flag(f, f->long_name, out);
+            gen_flag(f, out);
             f = f->next;
+        }
+
+        NodeListItem *global_item = node_list_root(global_nodes_list);
+        while (global_item && global_item->node->type == NODE_FLAG) {
+            f = global_item->node->as.flag;
+            gen_flag(f, out);
+            global_item = global_item->next;
         }
 
         Arg *a = cmd->args;
@@ -166,16 +183,19 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
 }
 
 void generate(ASTCommand *root, StringBuffer *out) {
-    if (!root || !root->cmd)
+    if (!root || !root->cmd) {
         return;
+    }
 
     char *name = root->cmd->name;
+    NodeList *global_flags_list = node_list_init();
 
     sb_appendf(out, "#compdef %s\n\n", name);
     sb_append(out, "# This script was generated automatically\n\n");
 
     // Start the recursive generation
-    gen_cmd_function(root, name, out);
+    gen_cmd_function(root, name, global_flags_list, out);
+    node_list_free(global_flags_list);
 
     // The Execution Footer
     sb_appendf(out, "if [ \"$funcstack[1]\" = \"_%s\" ]; then\n", name);

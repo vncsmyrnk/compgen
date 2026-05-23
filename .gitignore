@@ -2,3 +2,4 @@
 *.out
 dist
 result
+test/fixtures/*.actual.*

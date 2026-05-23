@@ -2,6 +2,7 @@
 #define NODE_H
 
 #include "string_builder.h"
+#include <stdbool.h>
 
 // Represents a command-line flag
 typedef struct Flag {
@@ -9,6 +10,7 @@ typedef struct Flag {
     char *long_name;   // e.g., "--verbose"
     char *help;        // e.g., "Enable output"
     char *value_name;  // e.g., "<PORT>" (NULL means boolean flag)
+    bool global;
     struct Flag *next; // Pointer to the next flag
 } Flag;
 

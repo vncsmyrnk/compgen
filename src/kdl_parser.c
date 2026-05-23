@@ -158,6 +158,11 @@ ParseResult kdl_parse_file(const char *filepath) {
                     } else if (strcmp(current_node_type, "cmd") == 0) {
                         current_cmd->help = string_dup(prop_val);
                     }
+                } else if (strcmp(prop_name, "global") == 0) {
+                }
+            } else if (event->value.type == KDL_TYPE_BOOLEAN) {
+                if (strcmp(current_node_type, "flag") == 0 && current_flag) {
+                    current_flag->global = event->value.boolean;
                 }
             }
             break;

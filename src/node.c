@@ -42,11 +42,12 @@ void node_cmd_print(Command *cmd, int indent, StringBuffer *out) {
 
     Flag *f = cmd->flags;
     while (f) {
-        sb_appendf(out, "%*s  Flag: %s | %s (Value: %s, Help: %s)\n", indent,
-                   "", f->short_name ? f->short_name : "None",
+        sb_appendf(out,
+                   "%*s  Flag: %s | %s (Value: %s, Help: %s, Global: %s)\n",
+                   indent, "", f->short_name ? f->short_name : "None",
                    f->long_name ? f->long_name : "None",
                    f->value_name ? f->value_name : "Bool",
-                   f->help ? f->help : "None");
+                   f->help ? f->help : "None", f->global ? "True" : "False");
         f = f->next;
     }
 
