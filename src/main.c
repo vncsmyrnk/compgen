@@ -2,7 +2,7 @@
 #include "node_stack.h"
 #include "string.h"
 #include "string_builder.h"
-#include "zsh.h"
+#include "shell.h"
 #include <kdl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -165,7 +165,7 @@ int main(void) {
     ast_debug_print();
 
     StringBuffer zsh_code = sb_create();
-    generate_zsh(ast_root(), &zsh_code);
+    generate(ast_root(), &zsh_code);
 
     printf("%s\n", zsh_code.data);
 

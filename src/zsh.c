@@ -1,4 +1,4 @@
-#include "zsh.h"
+#include "shell.h"
 #include "ast.h"
 #include <stdio.h>
 
