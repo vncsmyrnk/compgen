@@ -1,3 +1,4 @@
+[![CI Workflow](https://github.com/vncsmyrnk/compgen/actions/workflows/ci-cd.yaml/badge.svg)](https://github.com/vncsmyrnk/compgen/actions/workflows/ci-cd.yaml)
 [![contributions](https://img.shields.io/badge/contributions-welcome-brightgreen?labelColor=384047&color=33cb56)](https://github.com/vncsmyrnk/shell-utils/issues)
 
 # compgen
