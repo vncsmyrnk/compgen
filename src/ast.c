@@ -67,7 +67,7 @@ void _ast_debug_print(ASTCommand *c, int indent, StringBuffer *out) {
 void ast_debug_print(void) {
     StringBuffer s = sb_create();
     _ast_debug_print(root, 0, &s);
-    printf("%s", s.data);
+    fprintf(stderr, "%s", s.data);
     sb_free(&s);
 }
 
