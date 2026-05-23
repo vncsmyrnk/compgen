@@ -14,7 +14,7 @@ TEST(zsh_use_case_default) {
     ASSERT_NOT_NULL(expected_zsh);
 
     StringBuffer out = sb_create();
-    generate(ast_root(r.ast), &out);
+    generate(r.ast, &out);
 
     ASSERT_SNAPSHOT_EQ(expected_zsh, out.data,
                        "./test/fixtures/basic.actual.zsh");
@@ -34,7 +34,7 @@ TEST(zsh_global_flags) {
     ASSERT_NOT_NULL(expected_zsh);
 
     StringBuffer out = sb_create();
-    generate(ast_root(r.ast), &out);
+    generate(r.ast, &out);
 
     ASSERT_SNAPSHOT_EQ(expected_zsh, out.data,
                        "./test/fixtures/global-flags.actual.zsh");

@@ -13,6 +13,7 @@ typedef struct ASTCommand {
 typedef struct AST AST;
 
 AST *ast_init(Command *cmd_root);
+bool ast_empty(AST *ast);
 void ast_append(AST *ast, Command *cmd);
 void ast_rebase(AST *ast);
 ASTCommand *ast_root(AST *ast);

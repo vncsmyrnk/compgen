@@ -4,6 +4,6 @@
 #include "ast.h"
 #include "string_builder.h"
 
-void generate(ASTCommand *root, StringBuffer *out);
+void generate(AST *ast, StringBuffer *out);
 
 #endif // SHELL_H

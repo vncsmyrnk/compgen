@@ -1,6 +1,7 @@
 #include "ast.h"
 #include "node.h"
 #include "string.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +32,8 @@ AST *ast_init(Command *cmd_root) {
     ast->current = ast->root;
     return ast;
 }
+
+bool ast_empty(AST *ast) { return ast == NULL || ast->root == NULL; }
 
 void ast_append(AST *ast, Command *cmd) {
     if (!ast) {

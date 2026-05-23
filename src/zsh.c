@@ -182,19 +182,20 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
     sb_append(out, "}\n\n");
 }
 
-void generate(ASTCommand *root, StringBuffer *out) {
-    if (!root || !root->cmd) {
+void generate(AST *ast, StringBuffer *out) {
+    if (ast_empty(ast)) {
         return;
     }
 
-    char *name = root->cmd->name;
+    ASTCommand *root_ast_cmd = ast_root(ast);
+    char *name = root_ast_cmd->cmd->name;
     NodeList *global_flags_list = node_list_init();
 
     sb_appendf(out, "#compdef %s\n\n", name);
     sb_append(out, "# This script was generated automatically\n\n");
 
     // Start the recursive generation
-    gen_cmd_function(root, name, global_flags_list, out);
+    gen_cmd_function(root_ast_cmd, name, global_flags_list, out);
     node_list_free(global_flags_list);
 
     // The Execution Footer
