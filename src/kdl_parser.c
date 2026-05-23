@@ -45,7 +45,7 @@ ParseResult kdl_parse_file(const char *filepath) {
 
     kdl_event_data *event;
 
-    Command *root_cmd = node_create_cmd("root");
+    Command *root_cmd = node_create_cmd(NULL);
     ast_append(ast, root_cmd);
     Command *current_cmd = root_cmd;
 
@@ -129,7 +129,6 @@ ParseResult kdl_parse_file(const char *filepath) {
                     } else if (strcmp(current_arg->name, "<dir>") == 0) {
                         current_arg->type = ARG_TYPE_DIR;
                     }
-                    break;
                 } else if (strcmp(current_node_type, "choices") == 0 &&
                            current_arg) {
                     node_flag_add_choice(current_arg, val);

@@ -19,6 +19,7 @@ TEST(zsh_use_case_one) {
     ASSERT_SNAPSHOT_EQ(expected_zsh, out.data,
                        "test/fixtures/basic.actual.zsh");
 
+    free(expected_zsh);
     sb_free(&out);
     kdl_free_result(&r);
 }

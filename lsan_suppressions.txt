@@ -1,0 +1,3 @@
+leak:kdl_clone_str
+leak:_parse_value
+leak:kdl_parser_next_event

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -O2
+CFLAGS = -Wall -Wextra -std=c11 -g -O0 -fsanitize=address -fno-omit-frame-pointer
 INCLUDES = -Ivendor/ckdl/include
 LDLIBS = -lm
 
@@ -40,7 +40,7 @@ $(TEST_BIN): $(TEST_OBJS)
 
 .PHONY: test
 check: all $(TEST_BIN)
-	./$(TEST_BIN)
+	LSAN_OPTIONS=suppressions=lsan_suppressions.txt ./$(TEST_BIN)
 
 .PHONY: lint
 lint:
