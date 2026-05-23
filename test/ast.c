@@ -1,38 +1,8 @@
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
-
+#include "test.h"
 #include "../src/ast.h"
 #include "../src/node.h"
 
-// A macro to compare strings and print the actual values on failure
-#define ASSERT_STR_EQ(expected, actual)                                        \
-    do {                                                                       \
-        const char *exp = (expected);                                          \
-        const char *act = (actual);                                            \
-        if (strcmp(exp, act) != 0) {                                           \
-            fprintf(                                                           \
-                stderr,                                                        \
-                "\n[FAIL] %s:%d\n  Expected: \"%s\"\n  Actual:   \"%s\"\n",    \
-                __FILE__, __LINE__, exp, act);                                 \
-            assert(0); /* Force the abort */                                   \
-        }                                                                      \
-    } while (0)
-
-// A macro to check pointers
-#define ASSERT_NOT_NULL(ptr)                                                   \
-    do {                                                                       \
-        if ((ptr) == NULL) {                                                   \
-            fprintf(stderr,                                                    \
-                    "\n[FAIL] %s:%d\n  Pointer '%s' was unexpectedly NULL.\n", \
-                    __FILE__, __LINE__, #ptr);                                 \
-            assert(0);                                                         \
-        }                                                                      \
-    } while (0)
-
-void test_ast_add_command() {
-    printf("Running test_ast_add_command... ");
-
+TEST(ast_add_command) {
     Command *cmd = node_create_cmd("root");
     ast_add_cmd(cmd);
     ASTCommand *root = ast_root();
@@ -41,12 +11,9 @@ void test_ast_add_command() {
     ASSERT_STR_EQ("root", cmd->name);
 
     ast_free();
-    printf("OK\n");
 }
 
-void test_ast_manipulation() {
-    printf("Running test_ast_manipulation ");
-
+TEST(ast_manipulation) {
     Command *cmd_root = node_create_cmd("root");
     ast_add_cmd(cmd_root);
 
@@ -85,12 +52,9 @@ void test_ast_manipulation() {
     ASSERT_STR_EQ(cmd3->name, ast_cmd->cmd->name);
 
     ast_free();
-    printf("OK\n");
 }
 
-void test_ast_track_parent() {
-    printf("Running test_ast_manipulation... ");
-
+TEST(ast_track_parent) {
     Command *cmd_root = node_create_cmd("root");
     ast_add_cmd(cmd_root);
 
@@ -127,16 +91,4 @@ void test_ast_track_parent() {
     ASSERT_STR_EQ(ast_cmd2->cmd->name, ast_cmd31->parent->cmd->name);
 
     ast_free();
-    printf("OK\n");
-}
-
-int main() {
-    printf("=== Starting AST Unit Tests ===\n");
-
-    test_ast_add_command();
-    test_ast_manipulation();
-    test_ast_track_parent();
-
-    printf("=== All tests passed successfully! ===\n");
-    return 0;
 }
