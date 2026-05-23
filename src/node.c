@@ -5,7 +5,7 @@
 Command *node_create_cmd(const char *name) {
     Command *cmd = calloc(1, sizeof(Command));
     if (cmd && name) {
-        cmd->name = safe_strdup(name);
+        cmd->name = string_dup(name);
     }
     return cmd;
 }
@@ -15,7 +15,7 @@ Flag *node_create_flag(void) { return calloc(1, sizeof(Flag)); }
 Arg *node_create_arg(const char *name) {
     Arg *arg = calloc(1, sizeof(Arg));
     if (arg) {
-        arg->name = safe_strdup(name);
+        arg->name = string_dup(name);
         arg->choice_cap = 4; // Start with space for 4 choices
         arg->choices = malloc(sizeof(char *) * arg->choice_cap);
     }
@@ -30,7 +30,7 @@ void node_flag_add_choice(Arg *arg, const char *choice) {
         arg->choice_cap *= 2;
         arg->choices = realloc(arg->choices, sizeof(char *) * arg->choice_cap);
     }
-    arg->choices[arg->choice_count++] = safe_strdup(choice);
+    arg->choices[arg->choice_count++] = string_dup(choice);
 }
 
 void node_cmd_print(Command *cmd, int indent, StringBuffer *out) {

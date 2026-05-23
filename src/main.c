@@ -88,33 +88,30 @@ int main(void) {
 
                 if (strcmp(current_node_type, "name") == 0 &&
                     current_cmd == root_cmd) {
-                    safe_free_and_assign(&current_cmd->name, val);
+                    current_cmd->name = string_dup(val);
                 } else if (strcmp(current_node_type, "cmd") == 0) {
-                    safe_free_and_assign(&current_cmd->name, val);
+                    current_cmd->name = string_dup(val);
                 } else if (strcmp(current_node_type, "help") == 0) {
-                    safe_free_and_assign(&current_cmd->help, val);
+                    current_cmd->help = string_dup(val);
                 } else if (strcmp(current_node_type, "flag") == 0 &&
                            current_flag) {
                     char *token = strtok(val, " \t");
 
                     while (token != NULL) {
                         if (strncmp(token, "--", 2) == 0) {
-                            safe_free_and_assign(&current_flag->long_name,
-                                                 token);
+                            current_flag->long_name = string_dup(token);
                         } else if (token[0] == '-') {
-                            safe_free_and_assign(&current_flag->short_name,
-                                                 token);
+                            current_flag->short_name = string_dup(token);
                         } else if (token[0] == '<' &&
                                    token[strlen(token) - 1] == '>') {
-                            safe_free_and_assign(&current_flag->value_name,
-                                                 token);
+                            current_flag->value_name = string_dup(token);
                         }
 
                         token = strtok(NULL, " \t");
                     }
                 } else if (strcmp(current_node_type, "arg") == 0 &&
                            current_arg) {
-                    safe_free_and_assign(&current_arg->name, val);
+                    current_arg->name = string_dup(val);
                 } else if (strcmp(current_node_type, "choices") == 0 &&
                            current_arg) {
                     node_flag_add_choice(current_arg, val);
@@ -135,12 +132,12 @@ int main(void) {
                 if (strcmp(prop_name, "help") == 0) {
                     if (strcmp(current_node_type, "flag") == 0 &&
                         current_flag) {
-                        safe_free_and_assign(&current_flag->help, prop_val);
+                        current_flag->help = string_dup(prop_val);
                     } else if (strcmp(current_node_type, "arg") == 0 &&
                                current_arg) {
-                        safe_free_and_assign(&current_arg->help, prop_val);
+                        current_arg->help = string_dup(prop_val);
                     } else if (strcmp(current_node_type, "cmd") == 0) {
-                        safe_free_and_assign(&current_cmd->help, prop_val);
+                        current_cmd->help = string_dup(prop_val);
                     }
                 }
             }
