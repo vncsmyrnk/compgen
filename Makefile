@@ -1,10 +1,10 @@
+SRCDIR = .
+
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -g -O2
+CFLAGS = $(shell cat $(SRCDIR)/compile_flags.txt)
 CFLAGS_TEST = -Wall -Wextra -std=c11 -g -O0 -fsanitize=address -fno-omit-frame-pointer
-INCLUDES = -Ivendor/ckdl/include
 LDLIBS = -lm
 
-SRCDIR = .
 SRCS = $(wildcard $(SRCDIR)/src/*.c) $(wildcard $(SRCDIR)/vendor/ckdl/src/*.c)
 ALL_SRCS = $(wildcard $(SRCDIR)/src/*.c) $(wildcard $(SRCDIR)/vendor/ckdl/src/*.c) $(wildcard $(SRCDIR)/test/*.c)
 OBJS = $(SRCS:.c=.o)
@@ -26,6 +26,7 @@ TEST_OBJS = $(TEST_SRCS:.c=.o)
 
 all: $(TARGET)
 
+$(TARGET): CFLAGS += -O2
 $(TARGET): $(OBJS)
 	@mkdir -p $(OUTPUT)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDLIBS)
@@ -35,6 +36,7 @@ install: all
 	$(INSTALL) -d $(DESTDIR)$(BINDIR)
 	$(INSTALL_PROGRAM) $(TARGET) $(DESTDIR)$(BINDIR)
 
+$(TEST_BIN): CFLAGS += -g -O0 -fsanitize=address -fno-omit-frame-pointer
 $(TEST_BIN): $(TEST_OBJS)
 	@mkdir -p $(OUTPUT)
 	$(CC) $(CFLAGS_TEST) -o $@ $(TEST_OBJS) $(LDLIBS)
@@ -52,7 +54,7 @@ format:
 	clang-format -i $(ALL_SRCS)
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: clean
 clean:
