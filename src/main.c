@@ -2,6 +2,7 @@
 #include "ast.h"
 #include "kdl_parser.h"
 #include "shell.h"
+#include "version.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,15 +13,21 @@ void print_usage(const char *prog_name) {
 
 int main(int argc, char **argv) {
     ArgParser *parser = argparse_new("Shell completions generator.");
+    argparse_add_str_choices(parser, 's', "shell", "Target shell", "zsh",
+                             (const char *[]){"zsh", NULL});
     argparse_add_bool(
         parser, 'd', "debug",
         "Prints information useful to debug the completion generation");
-    argparse_add_str_choices(parser, 's', "shell", "Target shell", "zsh",
-                             (const char *[]){"zsh", NULL});
+    argparse_add_bool(parser, 'v', "version", "Prints version");
 
     if (!argparse_parse(parser, argc, argv)) {
         argparse_free(parser);
         return 1;
+    }
+
+    if (argparse_get_bool(parser, "version")) {
+        printf("%s\n", VERSION);
+        return EXIT_SUCCESS;
     }
 
     if (argparse_positional_count(parser) == 0) {

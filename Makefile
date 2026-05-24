@@ -1,8 +1,9 @@
 SRCDIR = .
 
+VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || cat VERSION 2>/dev/null || echo "unknown")
+
 CC = gcc
-CFLAGS = $(shell cat $(SRCDIR)/compile_flags.txt)
-CFLAGS_TEST = -Wall -Wextra -std=c11 -g -O0 -fsanitize=address -fno-omit-frame-pointer
+CFLAGS = $(shell cat $(SRCDIR)/compile_flags.txt) -DVERSION=\"$(VERSION)\"
 LDLIBS = -lm
 
 SRCS = $(wildcard $(SRCDIR)/src/*.c) $(wildcard $(SRCDIR)/vendor/ckdl/src/*.c)
@@ -36,10 +37,19 @@ install: all
 	$(INSTALL) -d $(DESTDIR)$(BINDIR)
 	$(INSTALL_PROGRAM) $(TARGET) $(DESTDIR)$(BINDIR)
 
+.PHONY: dist
+dist:
+	@echo "Packaging source for $(VERSION)..."
+	@mkdir -p compgen-$(VERSION)
+	git archive HEAD | tar -x -C compgen-$(VERSION)
+	@echo $(VERSION) > compgen-$(VERSION)/VERSION
+	tar -czvf compgen-$(VERSION).tar.gz compgen-$(VERSION)
+	@rm -rf compgen-$(VERSION)
+
 $(TEST_BIN): CFLAGS += -g -O0 -fsanitize=address -fno-omit-frame-pointer
 $(TEST_BIN): $(TEST_OBJS)
 	@mkdir -p $(OUTPUT)
-	$(CC) $(CFLAGS_TEST) -o $@ $(TEST_OBJS) $(LDLIBS)
+	$(CC) $(CFLAGS) -o $@ $(TEST_OBJS) $(LDLIBS)
 
 .PHONY: test
 check: all $(TEST_BIN)
