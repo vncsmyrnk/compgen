@@ -18,7 +18,7 @@ This project's intent is to also define a specification for the completion gener
 ## Roadmap
 
 - [x] KDL specification for commands, flags and arguments
-- [ ] KDL parsing and AST implementation
+- [x] KDL parsing and AST implementation
 - [ ] Completion generation for a particular shell, generic enough to expect future implementations for other shells
 - [ ] Document usage for users
 - [ ] Document requirements and guidelines and for more shells
