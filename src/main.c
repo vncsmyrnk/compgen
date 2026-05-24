@@ -1,3 +1,5 @@
+#include "argparse.h"
+#include "ast.h"
 #include "kdl_parser.h"
 #include "shell.h"
 #include <stdio.h>
@@ -8,12 +10,22 @@ void print_usage(const char *prog_name) {
 }
 
 int main(int argc, char **argv) {
-    if (argc < 2) {
+    ArgParser *parser = argparse_new("Shell completions generator.");
+    argparse_add_bool(
+        parser, 'd', "debug",
+        "Prints information useful to debug the completion generation");
+
+    if (!argparse_parse(parser, argc, argv)) {
+        argparse_free(parser);
+        return 1;
+    }
+
+    if (argparse_positional_count(parser) == 0) {
         print_usage(argv[0]);
         return EXIT_FAILURE;
     }
 
-    const char *file_path = argv[1];
+    const char *file_path = argparse_positional_at(parser, 0);
     ParseResult r = kdl_parse_file(file_path);
     if (r.status != KDL_RESULT_OK) {
         switch (r.status) {
@@ -31,6 +43,11 @@ int main(int argc, char **argv) {
         }
         kdl_free_result(&r);
         return EXIT_FAILURE;
+    }
+
+    if (argparse_get_bool(parser, "debug")) {
+        ast_debug_print(r.ast);
+        return EXIT_SUCCESS;
     }
 
     StringBuffer zsh_code = sb_create();
