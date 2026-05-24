@@ -12,6 +12,13 @@ Command *node_create_cmd(const char *name) {
 
 Flag *node_create_flag(void) { return calloc(1, sizeof(Flag)); }
 
+char *node_flag_value_name_canonical(Flag *f) {
+    if (f) {
+        return string_slice(f->value_name, 1, -1);
+    }
+    return NULL;
+}
+
 Arg *node_create_arg(const char *name) {
     Arg *arg = calloc(1, sizeof(Arg));
     if (arg) {
@@ -68,6 +75,7 @@ void node_flag_free(Flag *f) {
         free(f->long_name);
         free(f->help);
         free(f->value_name);
+        free(f->run);
         free(f);
     }
 }

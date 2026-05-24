@@ -1,8 +1,10 @@
 #include "ast.h"
+#include "node.h"
 #include "node_list.h"
 #include "shell.h"
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static void indent(StringBuffer *out, int level) {
     for (int i = 0; i < level; i++) {
@@ -27,6 +29,13 @@ static void gen_single_flag(Flag *f, const char *flag_name, StringBuffer *out) {
         sb_appendf(out, "[%s]", f->help);
     if (f->value_name)
         sb_appendf(out, ":%s:", f->value_name);
+
+    if (f->run) {
+        char *flag_value_name_canonical = node_flag_value_name_canonical(f);
+        sb_appendf(out, "->action_%s", flag_value_name_canonical);
+        free(flag_value_name_canonical);
+    }
+
     sb_append(out, "' \\\n");
 }
 
@@ -119,11 +128,15 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
         indent(out, 2);
         sb_append(out, "'*:: :->args' && ret=0\n\n");
 
+        bool case_state_run_statement_added = false;
         a = cmd->args;
         while (a) {
             if (a->run) {
-                indent(out, 1);
-                sb_append(out, "case $state in\n");
+                if (!case_state_run_statement_added) {
+                    indent(out, 1);
+                    sb_append(out, "case $state in\n");
+                    case_state_run_statement_added = true;
+                }
 
                 indent(out, 2);
                 sb_appendf(out, "action_%s)\n", a->name);
@@ -139,11 +152,44 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
 
                 indent(out, 3);
                 sb_append(out, ";;\n");
-
-                indent(out, 1);
-                sb_append(out, "esac\n\n");
             }
             a = a->next;
+        }
+
+        f = cmd->flags;
+        while (f) {
+            if (f->run) {
+                if (!case_state_run_statement_added) {
+                    indent(out, 1);
+                    sb_append(out, "case $state in\n");
+                    case_state_run_statement_added = true;
+                }
+
+                char *flag_value_name_canonical =
+                    node_flag_value_name_canonical(f);
+
+                indent(out, 2);
+                sb_appendf(out, "action_%s)\n", flag_value_name_canonical);
+
+                indent(out, 3);
+                sb_append(out, "local -a choices\n");
+                indent(out, 3);
+                sb_appendf(out, "choices=(${(f)\"$(_call_program %s %s)\"})\n",
+                           flag_value_name_canonical, f->run);
+                free(flag_value_name_canonical);
+
+                indent(out, 3);
+                sb_appendf(out, "compadd -a choices && ret=0\n");
+
+                indent(out, 3);
+                sb_append(out, ";;\n");
+            }
+            f = f->next;
+        }
+
+        if (case_state_run_statement_added) {
+            indent(out, 1);
+            sb_append(out, "esac\n\n");
         }
 
         indent(out, 1);

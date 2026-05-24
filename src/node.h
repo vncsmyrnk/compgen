@@ -6,10 +6,11 @@
 
 // Represents a command-line flag
 typedef struct Flag {
-    char *short_name;  // e.g., "-v"
-    char *long_name;   // e.g., "--verbose"
-    char *help;        // e.g., "Enable output"
-    char *value_name;  // e.g., "<PORT>" (NULL means boolean flag)
+    char *short_name; // e.g., "-v"
+    char *long_name;  // e.g., "--verbose"
+    char *help;       // e.g., "Enable output"
+    char *value_name; // e.g., "<PORT>" (NULL means boolean flag)
+    char *run;        // Shell command to generate choices dynamically
     bool global;
     struct Flag *next; // Pointer to the next flag
 } Flag;
@@ -24,29 +25,25 @@ typedef enum {
 
 // Represents a positional argument with static choices
 typedef struct Arg {
-    char *name;         // e.g., "<action>"
-    char *help;         // e.g., "The action to perform"
+    char *name; // e.g., "<action>"
+    char *help; // e.g., "The action to perform"
     ArgType type;
-    char **choices;     // Array of strings: ["start", "stop", "restart"]
-    int choice_count;   // How many choices exist
-    int choice_cap;     // Internal capacity for the array
-    char *run;          // Shell command to generate choices dynamically
-    struct Arg *next;   // Pointer to the next flag
+    char **choices;   // Array of strings: ["start", "stop", "restart"]
+    int choice_count; // How many choices exist
+    int choice_cap;   // Internal capacity for the array
+    char *run;        // Shell command to generate choices dynamically
+    struct Arg *next; // Pointer to the next flag
 } Arg;
 
 // Represents a CLI command or subcommand
 typedef struct Command {
-    char *name;                  // e.g., "deploy"
-    char *help;                  // e.g., "Deploy the system"
-    struct Flag *flags;          // Linked list of flags
-    struct Arg *args;            // Linked list of arguments
+    char *name;         // e.g., "deploy"
+    char *help;         // e.g., "Deploy the system"
+    struct Flag *flags; // Linked list of flags
+    struct Arg *args;   // Linked list of arguments
 } Command;
 
-typedef enum {
-    NODE_CMD,
-    NODE_FLAG,
-    NODE_ARG
-} NodeType;
+typedef enum { NODE_CMD, NODE_FLAG, NODE_ARG } NodeType;
 
 typedef struct {
     NodeType type;
@@ -59,6 +56,7 @@ typedef struct {
 
 Command *node_create_cmd(const char *name);
 Flag *node_create_flag(void);
+char *node_flag_value_name_canonical(Flag *f);
 Arg *node_create_arg(const char *name);
 void node_flag_add_choice(Arg *arg, const char *choice);
 void node_cmd_print(Command *cmd, int indent, StringBuffer *out);

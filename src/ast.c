@@ -1,6 +1,5 @@
 #include "ast.h"
 #include "node.h"
-#include "string.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>

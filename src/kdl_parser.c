@@ -157,7 +157,12 @@ ParseResult kdl_parse_file(const char *filepath) {
                         current_cmd->help = string_dup(prop_val);
                     }
                 } else if (strcmp(prop_name, "run") == 0) {
-                    current_arg->run = string_dup(prop_val);
+                    if (strcmp(current_node_type, "arg") == 0 && current_arg) {
+                        current_arg->run = string_dup(prop_val);
+                    } else if (strcmp(current_node_type, "flag") == 0 &&
+                               current_flag) {
+                        current_flag->run = string_dup(prop_val);
+                    }
                 }
             } else if (event->value.type == KDL_TYPE_BOOLEAN) {
                 if (strcmp(current_node_type, "flag") == 0 && current_flag) {
