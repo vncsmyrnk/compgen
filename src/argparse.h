@@ -14,6 +14,10 @@ void argparse_add_bool(ArgParser *parser, char short_name,
 void argparse_add_str(ArgParser *parser, char short_name, const char *long_name,
                       const char *help, const char *default_val);
 
+void argparse_add_str_choices(ArgParser *parser, char short_name,
+                              const char *long_name, const char *help,
+                              const char *default_val, const char **choices);
+
 // Returns false if there was a syntax error in the provided arguments
 bool argparse_parse(ArgParser *parser, int argc, char **argv);
 

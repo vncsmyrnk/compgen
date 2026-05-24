@@ -13,6 +13,7 @@ typedef struct {
     char *long_name;
     char *help;
     char *default_val;
+    const char **choices;
     bool is_present;
     char *str_val;
 } ArgDef;
@@ -79,6 +80,20 @@ void argparse_add_str(ArgParser *parser, char short_name, const char *long_name,
     add_arg(parser, def);
 }
 
+void argparse_add_str_choices(ArgParser *parser, char short_name,
+                              const char *long_name, const char *help,
+                              const char *default_val, const char **choices) {
+    ArgDef def = {.type = ARG_STR,
+                  .short_name = short_name,
+                  .long_name = string_dup(long_name),
+                  .help = help ? string_dup(help) : NULL,
+                  .default_val = default_val ? string_dup(default_val) : NULL,
+                  .choices = choices,
+                  .is_present = false,
+                  .str_val = NULL};
+    add_arg(parser, def);
+}
+
 bool argparse_parse(ArgParser *parser, int argc, char **argv) {
     struct option *long_opts =
         calloc(parser->arg_count + 2, sizeof(struct option));
@@ -110,12 +125,10 @@ bool argparse_parse(ArgParser *parser, int argc, char **argv) {
         }
     }
 
-    // Null terminate
     memset(&long_opts[parser->arg_count + 1], 0, sizeof(struct option));
     short_opts[short_idx] = '\0';
 
-    // 2. Parse using getopt_long
-    optind = 1; // Reset global getopt state
+    optind = 1;
     int opt;
     int option_index = 0;
 
@@ -125,24 +138,55 @@ bool argparse_parse(ArgParser *parser, int argc, char **argv) {
             argparse_print_help(parser);
             exit(0);
         } else if (opt == '?') {
-            // getopt_long automatically prints the error
             free(long_opts);
             free(short_opts);
             return false;
-        } else if (opt >= 256) {
-            // It was a long option
-            int idx = opt - 256;
-            parser->args[idx].is_present = true;
-            if (parser->args[idx].type == ARG_STR)
-                parser->args[idx].str_val = optarg;
+        }
+
+        ArgDef *matched_arg = NULL;
+        if (opt >= 256) {
+            matched_arg = &parser->args[opt - 256];
         } else {
-            // It was a short option, map it back to the arg
             for (int i = 0; i < parser->arg_count; i++) {
                 if (parser->args[i].short_name == opt) {
-                    parser->args[i].is_present = true;
-                    if (parser->args[i].type == ARG_STR)
-                        parser->args[i].str_val = optarg;
+                    matched_arg = &parser->args[i];
                     break;
+                }
+            }
+        }
+
+        // Process the matched argument
+        if (matched_arg) {
+            matched_arg->is_present = true;
+
+            if (matched_arg->type == ARG_STR) {
+                matched_arg->str_val = optarg;
+
+                if (matched_arg->choices != NULL) {
+                    bool is_valid = false;
+
+                    for (int c = 0; matched_arg->choices[c] != NULL; c++) {
+                        if (strcmp(optarg, matched_arg->choices[c]) == 0) {
+                            is_valid = true;
+                            break;
+                        }
+                    }
+
+                    if (!is_valid) {
+                        fprintf(stderr,
+                                "Error: Invalid value '%s' for '--%s'.\n",
+                                optarg, matched_arg->long_name);
+                        fprintf(stderr, "Allowed values are: ");
+                        for (int c = 0; matched_arg->choices[c] != NULL; c++) {
+                            fprintf(stderr, "%s%s", c > 0 ? ", " : "",
+                                    matched_arg->choices[c]);
+                        }
+                        fprintf(stderr, "\n");
+
+                        free(long_opts);
+                        free(short_opts);
+                        return false;
+                    }
                 }
             }
         }
@@ -151,7 +195,6 @@ bool argparse_parse(ArgParser *parser, int argc, char **argv) {
     free(long_opts);
     free(short_opts);
 
-    // 3. Collect positional arguments
     while (optind < argc) {
         if (parser->pos_count >= parser->pos_capacity) {
             parser->pos_capacity *= 2;
@@ -251,6 +294,14 @@ void argparse_print_help(ArgParser *parser) {
 
         if (a.help) {
             printf("%s", a.help);
+        }
+
+        if (a.choices) {
+            printf(" [choices: ");
+            for (int c = 0; a.choices[c] != NULL; c++) {
+                printf("%s%s", c > 0 ? "|" : "", a.choices[c]);
+            }
+            printf("]");
         }
 
         if (a.default_val) {

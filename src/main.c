@@ -4,9 +4,10 @@
 #include "shell.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 void print_usage(const char *prog_name) {
-    fprintf(stderr, "Usage: %s <input.kdl>\n", prog_name);
+    fprintf(stderr, "Usage: %s <file.kdl> [FLAGS]\n", prog_name);
 }
 
 int main(int argc, char **argv) {
@@ -14,6 +15,8 @@ int main(int argc, char **argv) {
     argparse_add_bool(
         parser, 'd', "debug",
         "Prints information useful to debug the completion generation");
+    argparse_add_str_choices(parser, 's', "shell", "Target shell", "zsh",
+                             (const char *[]){"zsh", NULL});
 
     if (!argparse_parse(parser, argc, argv)) {
         argparse_free(parser);
@@ -50,11 +53,17 @@ int main(int argc, char **argv) {
         return EXIT_SUCCESS;
     }
 
-    StringBuffer zsh_code = sb_create();
-    generate(r.ast, &zsh_code);
-    printf("%s\n", zsh_code.data);
+    StringBuffer generated_completion = sb_create();
+    if (strcmp(argparse_get_str(parser, "shell"), "zsh") == 0) {
+        generate(r.ast, &generated_completion);
+    }
 
-    sb_free(&zsh_code);
+    if (strcmp(generated_completion.data, "") == 0) {
+        return EXIT_FAILURE;
+    }
+    printf("%s\n", generated_completion.data);
+
+    sb_free(&generated_completion);
     kdl_free_result(&r);
     return EXIT_SUCCESS;
 }
