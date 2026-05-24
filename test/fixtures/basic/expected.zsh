@@ -44,7 +44,7 @@ function _mytool_backup_remote_unwrap() {
         '(-o --to-stdout)'--to-stdout'[Prints script]' \
         '(-h --help)'-h'[Display help]' \
         '(-h --help)'--help'[Display help]' \
-        '1:The backup file name:' \
+        '1:backup_name:' \
         '*:: :->args' && ret=0
 
     return ret

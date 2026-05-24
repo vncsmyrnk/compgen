@@ -1,6 +1,7 @@
 #include "ast.h"
 #include "node_list.h"
 #include "shell.h"
+#include <stdbool.h>
 #include <stdio.h>
 
 static void indent(StringBuffer *out, int level) {
@@ -105,13 +106,45 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
                 break;
             default:
                 indent(out, 2);
-                sb_appendf(out, "'%d:%s:' \\\n", arg_index, a->help);
+                sb_appendf(out, "'%d:%s:", arg_index, a->name);
+                if (a->run) {
+                    sb_appendf(out, "->action_%s", a->name);
+                }
+                sb_appendf(out, "' \\\n", a->name);
             }
             arg_index++;
             a = a->next;
         }
+
         indent(out, 2);
         sb_append(out, "'*:: :->args' && ret=0\n\n");
+
+        a = cmd->args;
+        while (a) {
+            if (a->run) {
+                indent(out, 1);
+                sb_append(out, "case $state in\n");
+
+                indent(out, 2);
+                sb_appendf(out, "action_%s)\n", a->name);
+
+                indent(out, 3);
+                sb_append(out, "local -a choices\n");
+                indent(out, 3);
+                sb_appendf(out, "choices=(${(f)\"$(_call_program %s %s)\"})\n",
+                           a->name, a->run);
+
+                indent(out, 3);
+                sb_appendf(out, "compadd -a choices && ret=0\n");
+
+                indent(out, 3);
+                sb_append(out, ";;\n");
+
+                indent(out, 1);
+                sb_append(out, "esac\n\n");
+            }
+            a = a->next;
+        }
 
         indent(out, 1);
         sb_append(out, "return ret\n");

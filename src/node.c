@@ -80,6 +80,7 @@ void node_arg_free(Arg *a) {
             free(a->choices[i]);
         }
         free(a->choices);
+        free(a->run);
         free(a);
     }
 }

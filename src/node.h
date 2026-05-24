@@ -30,7 +30,8 @@ typedef struct Arg {
     char **choices;     // Array of strings: ["start", "stop", "restart"]
     int choice_count;   // How many choices exist
     int choice_cap;     // Internal capacity for the array
-    struct Arg *next;  // Pointer to the next flag
+    char *run;          // Shell command to generate choices dynamically
+    struct Arg *next;   // Pointer to the next flag
 } Arg;
 
 // Represents a CLI command or subcommand
