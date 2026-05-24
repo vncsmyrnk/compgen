@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 static void indent(StringBuffer *out, int level) {
     for (int i = 0; i < level; i++) {
@@ -25,17 +26,25 @@ static void gen_single_flag(Flag *f, const char *flag_name, StringBuffer *out) {
 
     sb_append(out, flag_name);
     sb_append(out, "'");
+
     if (f->help)
         sb_appendf(out, "[%s]", f->help);
-    if (f->value_name)
-        sb_appendf(out, ":%s:", f->value_name);
+
+    char *flag_value_name_canonical = node_flag_value_name_canonical(f);
+    if (flag_value_name_canonical)
+        sb_appendf(out, ":%s:", flag_value_name_canonical);
 
     if (f->run) {
-        char *flag_value_name_canonical = node_flag_value_name_canonical(f);
         sb_appendf(out, "->action_%s", flag_value_name_canonical);
-        free(flag_value_name_canonical);
+    } else if (flag_value_name_canonical) {
+        if (strcmp(flag_value_name_canonical, "file") == 0) {
+            sb_append(out, "_files");
+        } else if (strcmp(flag_value_name_canonical, "dir") == 0) {
+            sb_append(out, "_files -/");
+        }
     }
 
+    free(flag_value_name_canonical);
     sb_append(out, "' \\\n");
 }
 

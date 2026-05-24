@@ -8,8 +8,12 @@ function _mytool_checkout() {
     local ret=1
 
     _arguments -C \
-        '(-t --track)'-t'[When creating  a  new  branch, set up "upstream" configuration]:<ref>:->action_ref' \
-        '(-t --track)'--track'[When creating  a  new  branch, set up "upstream" configuration]:<ref>:->action_ref' \
+        '(-d --dir)'-d'[Dir flag example]:dir:_files -/' \
+        '(-d --dir)'--dir'[Dir flag example]:dir:_files -/' \
+        '(-f --file)'-f'[File flag example]:file:_files' \
+        '(-f --file)'--file'[File flag example]:file:_files' \
+        '(-t --track)'-t'[When creating a new branch, set up "upstream" configuration]:ref:->action_ref' \
+        '(-t --track)'--track'[When creating a new branch, set up "upstream" configuration]:ref:->action_ref' \
         '*:: :->args' && ret=0
 
     case $state in

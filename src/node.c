@@ -13,7 +13,7 @@ Command *node_create_cmd(const char *name) {
 Flag *node_create_flag(void) { return calloc(1, sizeof(Flag)); }
 
 char *node_flag_value_name_canonical(Flag *f) {
-    if (f) {
+    if (f && f->value_name) {
         return string_slice(f->value_name, 1, -1);
     }
     return NULL;
