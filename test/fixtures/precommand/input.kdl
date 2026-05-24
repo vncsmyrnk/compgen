@@ -1,0 +1,8 @@
+name "mytool"
+help "A sample CLI tool for testing completions"
+
+cmd "environment" help="The action to perform" {
+    cmd "exec" help="The action to perform" {
+        arg "<precommand>" help="Executes the following command with environment secrets"
+    }
+}

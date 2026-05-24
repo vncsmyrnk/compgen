@@ -17,10 +17,11 @@ typedef struct Flag {
 
 // Represents the semantic behavior of the argument
 typedef enum {
-    ARG_TYPE_DEFAULT, // Standard argument or static choices
-    ARG_TYPE_FILE,    // Triggers file completion
-    ARG_TYPE_DIR,     // Triggers directory completion
-    ARG_TYPE_INT      // Guards digits
+    ARG_TYPE_DEFAULT,    // Standard argument or static choices
+    ARG_TYPE_FILE,       // Triggers file completion
+    ARG_TYPE_DIR,        // Triggers directory completion
+    ARG_TYPE_PRECOMMAND, // Triggers completions for the following command typed
+    ARG_TYPE_INT         // Guards digits
 } ArgType;
 
 // Represents a positional argument with static choices

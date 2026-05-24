@@ -113,6 +113,10 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
                 indent(out, 2);
                 sb_appendf(out, "'%d:%s:_files -/' \\\n", arg_index, a->help);
                 break;
+            case ARG_TYPE_PRECOMMAND: // No other argument is expected after
+                                      // this type as it generates suggestions
+                                      // for the following command
+                break;
             default:
                 indent(out, 2);
                 sb_appendf(out, "'%d:%s:", arg_index, a->name);
@@ -131,7 +135,21 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
         bool case_state_run_statement_added = false;
         a = cmd->args;
         while (a) {
-            if (a->run) {
+            if (a->type == ARG_TYPE_PRECOMMAND) {
+                if (!case_state_run_statement_added) {
+                    indent(out, 1);
+                    sb_append(out, "case $state in\n");
+                    case_state_run_statement_added = true;
+                }
+
+                indent(out, 2);
+                sb_append(out, "args)\n");
+                indent(out, 3);
+                sb_appendf(out, "_normal\n");
+
+                indent(out, 3);
+                sb_append(out, ";;\n");
+            } else if (a->run) {
                 if (!case_state_run_statement_added) {
                     indent(out, 1);
                     sb_append(out, "case $state in\n");
