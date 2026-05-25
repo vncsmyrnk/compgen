@@ -29,6 +29,13 @@ Arg *node_create_arg(const char *name) {
     return arg;
 }
 
+char *node_arg_name_canonical(Arg *a) {
+    if (a && a->name) {
+        return string_slice(a->name, 1, -1);
+    }
+    return NULL;
+}
+
 void node_flag_add_choice(Arg *arg, const char *choice) {
     if (!arg || !choice)
         return;

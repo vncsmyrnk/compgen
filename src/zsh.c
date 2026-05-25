@@ -127,12 +127,14 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
                                       // for the following command
                 break;
             default:
+                char *arg_name_canonical = node_arg_name_canonical(a);
                 indent(out, 2);
-                sb_appendf(out, "'%d:%s:", arg_index, a->name);
+                sb_appendf(out, "'%d:%s:", arg_index, arg_name_canonical);
                 if (a->run) {
-                    sb_appendf(out, "->action_%s", a->name);
+                    sb_appendf(out, "->action_%s", arg_name_canonical);
                 }
-                sb_appendf(out, "' \\\n", a->name);
+                sb_appendf(out, "' \\\n", arg_name_canonical);
+                free(arg_name_canonical);
             }
             arg_index++;
             a = a->next;
@@ -165,14 +167,16 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
                     case_state_run_statement_added = true;
                 }
 
+                char *arg_name_canonical = node_arg_name_canonical(a);
                 indent(out, 2);
-                sb_appendf(out, "action_%s)\n", a->name);
+                sb_appendf(out, "action_%s)\n", arg_name_canonical);
 
                 indent(out, 3);
                 sb_append(out, "local -a choices\n");
                 indent(out, 3);
                 sb_appendf(out, "choices=(${(f)\"$(_call_program %s %s)\"})\n",
-                           a->name, a->run);
+                           arg_name_canonical, a->run);
+                free(arg_name_canonical);
 
                 indent(out, 3);
                 sb_appendf(out, "compadd -a choices && ret=0\n");

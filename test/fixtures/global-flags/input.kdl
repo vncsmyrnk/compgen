@@ -10,7 +10,7 @@ cmd "backup" help="The action to perform" {
         cmd "list" help="help for list"
         cmd "unwrap" help="help for list" {
             flag "-l --latest" help="Fetches latest script"
-            arg "backup_name" help="The backup file name"
+            arg "<backup_name>" help="The backup file name"
         }
     }
 }

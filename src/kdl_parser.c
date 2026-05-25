@@ -128,6 +128,8 @@ ParseResult kdl_parse_file(const char *filepath) {
                         current_arg->type = ARG_TYPE_FILE;
                     } else if (strcmp(current_arg->name, "<dir>") == 0) {
                         current_arg->type = ARG_TYPE_DIR;
+                    } else if (strcmp(current_arg->name, "<int>") == 0) {
+                        current_arg->type = ARG_TYPE_INT;
                     } else if (strcmp(current_arg->name, "<precommand>") == 0) {
                         current_arg->type = ARG_TYPE_PRECOMMAND;
                     }

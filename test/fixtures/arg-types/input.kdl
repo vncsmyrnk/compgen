@@ -1,0 +1,30 @@
+name "mytool"
+help "A self-sufficient runtime for containers"
+
+cmd "stop" help="Stop one or more running containers" {
+    arg "<int>" help="Container ID"
+}
+
+cmd "cp" help="Copy files/folders between a container and the local filesystem" {
+    arg "<container>" help="Source container" run="docker container ls -a 2>/dev/null"
+    arg "<container>" help="Destination container" run="docker container ls -a 2>/dev/null"
+}
+
+cmd "checkout" help="Switch branches or restore working tree files" {
+    arg "<branch-or-tree-ish-or-file>" help="Git ref name" run="git for-each-ref --format='\"%(refname)\"' refs/heads 2>/dev/null"
+}
+
+cmd "run" help="Create and run a new container from an image" {
+    arg "<image>" help="Container image" run="docker container ls -a 2>/dev/null"
+    arg "<string>" help="Command"
+}
+
+cmd "generate" help="Generate a completion file" {
+    arg "<shell>" help="Target shell" {
+        choices "zsh" "bash"
+    }
+}
+
+cmd "exec" help="The action to perform" {
+    arg "<precommand>" help="Executes a system command"
+}

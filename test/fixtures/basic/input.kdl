@@ -16,7 +16,7 @@ cmd "backup" help="The action to perform" {
             flag "-o --to-stdout" help="Prints script"
             flag "-l --latest" help="Fetches latest script"
 
-            arg "backup_name" help="The backup file name"
+            arg "<backup_name>" help="The backup file name"
         }
     }
 }
