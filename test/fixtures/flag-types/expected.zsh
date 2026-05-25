@@ -12,8 +12,13 @@ function _mytool_checkout() {
         '(-d --dir)'--dir'[Dir flag example]:dir:_files -/' \
         '(-f --file)'-f'[File flag example]:file:_files' \
         '(-f --file)'--file'[File flag example]:file:_files' \
+        '(--ours)'--ours'[When checking out paths from the index, check out stage #2 for unmerged paths.]' \
         '(-t --track)'-t'[When creating a new branch, set up "upstream" configuration]:ref:->action_ref' \
         '(-t --track)'--track'[When creating a new branch, set up "upstream" configuration]:ref:->action_ref' \
+        '(-v --version)'-v'[Print version]' \
+        '(-v --version)'--version'[Print version]' \
+        '(-h --help)'-h'[Display help]' \
+        '(-h --help)'--help'[Display help]' \
         '*:: :->args' && ret=0
 
     case $state in

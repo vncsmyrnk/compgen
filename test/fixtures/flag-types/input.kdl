@@ -1,8 +1,12 @@
 name "mytool"
 help "mytool is a free and open source distributed version control system designed to handle everything from small to very large projects with speed and efficiency."
 
+flag "-h --help" help="Display help" global=#true
+flag "-v --version" help="Print version" global=#true
+
 cmd "checkout" help="Switch branches or restore working tree files" {
     flag "-t --track <ref>" help="When creating a new branch, set up \"upstream\" configuration" run="git for-each-ref --format='\"%(refname)\"' refs/heads 2>/dev/null"
+    flag "--ours" help="When checking out paths from the index, check out stage #2 for unmerged paths."
     flag "-f --file <file>" help="File flag example"
     flag "-d --dir <dir>" help="Dir flag example"
 }
