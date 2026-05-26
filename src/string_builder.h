@@ -10,19 +10,11 @@ typedef struct {
     size_t cap; // Total allocated memory capacity
 } StringBuffer;
 
-// Initialize a new, empty string buffer
 StringBuffer sb_create(void);
-
-// Free the allocated memory
 void sb_free(StringBuffer *sb);
-
-// Append a standard string
 void sb_append(StringBuffer *sb, const char *str);
-
-// Append a single character
 void sb_append_char(StringBuffer *sb, char c);
-
-// Append a formatted string (like printf)
 void sb_appendf(StringBuffer *sb, const char *fmt, ...);
+void sb_slice(StringBuffer *sb, int start, int end);
 
 #endif // STRING_BUILDER_H

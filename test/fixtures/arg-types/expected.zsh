@@ -87,8 +87,16 @@ function _mytool_generate() {
     local ret=1
 
     _arguments -C \
-        '1:shell:' \
+        '1:shell:->action_shell' \
         '*:: :->args' && ret=0
+
+    case $state in
+        action_shell)
+            local -a choices
+            choices=("zsh" "bash")
+            compadd -a choices && ret=0
+            ;;
+    esac
 
     return ret
 }

@@ -91,3 +91,36 @@ void sb_appendf(StringBuffer *sb, const char *fmt, ...) {
 
     sb->len += needed;
 }
+
+void sb_slice(StringBuffer *sb, int start, int end) {
+    if (!sb || !sb->data || sb->len == 0)
+        return;
+
+    if (start < 0)
+        start = sb->len + start;
+    if (end < 0)
+        end = sb->len + end;
+
+    if (end == 0)
+        end = sb->len;
+
+    if (start < 0)
+        start = 0;
+    if (end > (int)sb->len)
+        end = sb->len;
+
+    if (start >= end) {
+        sb->len = 0;
+        sb->data[0] = '\0';
+        return;
+    }
+
+    size_t new_len = end - start;
+
+    if (start > 0) {
+        memmove(sb->data, sb->data + start, new_len);
+    }
+
+    sb->len = new_len;
+    sb->data[sb->len] = '\0';
+}
