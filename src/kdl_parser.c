@@ -135,7 +135,7 @@ ParseResult kdl_parse_file(const char *filepath) {
                     }
                 } else if (strcmp(current_node_type, "choices") == 0 &&
                            current_arg) {
-                    node_flag_add_choice(current_arg, val);
+                    node_arg_add_choice(current_arg, val);
                 }
             }
             break;

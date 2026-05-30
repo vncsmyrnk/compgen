@@ -36,7 +36,7 @@ char *node_arg_name_canonical(Arg *a) {
     return NULL;
 }
 
-void node_flag_add_choice(Arg *arg, const char *choice) {
+void node_arg_add_choice(Arg *arg, const char *choice) {
     if (!arg || !choice)
         return;
 

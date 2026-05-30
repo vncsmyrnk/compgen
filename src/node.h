@@ -59,7 +59,7 @@ Command *node_create_cmd(const char *name);
 Flag *node_create_flag(void);
 char *node_flag_value_name_canonical(Flag *f);
 Arg *node_create_arg(const char *name);
-void node_flag_add_choice(Arg *arg, const char *choice);
+void node_arg_add_choice(Arg *arg, const char *choice);
 char *node_arg_name_canonical(Arg *a);
 void node_cmd_print(Command *cmd, int indent, StringBuffer *out);
 void node_flag_free(Flag *f);
