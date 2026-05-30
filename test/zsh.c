@@ -3,20 +3,20 @@
 #include "../src/string_builder.h"
 #include "test.h"
 
-TEST(zsh_use_case_default) {
-    ParseResult r = kdl_parse_file("./test/fixtures/basic/input.kdl");
+TEST(zsh_subcommands) {
+    ParseResult r = kdl_parse_file("./test/fixtures/subcommands/input.kdl");
     ASSERT_NOT_NULL(r.ast);
     ASSERT_INT_EQ(KDL_RESULT_OK, r.status);
 
     char *expected_zsh =
-        load_file_to_string("./test/fixtures/basic/expected.zsh");
+        load_file_to_string("./test/fixtures/subcommands/expected.zsh");
     ASSERT_NOT_NULL(expected_zsh);
 
     StringBuffer out = sb_create();
     generate(r.ast, &out);
 
     ASSERT_SNAPSHOT_EQ(expected_zsh, out.data,
-                       "./test/fixtures/basic.actual.zsh");
+                       "./test/fixtures/subcommands.actual.zsh");
 
     free(expected_zsh);
     sb_free(&out);

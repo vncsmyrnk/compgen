@@ -1,0 +1,15 @@
+name "mytool"
+help "A sample CLI tool for testing completions"
+
+cmd "backup" help="The action to perform" {
+    cmd "generate" help="help for generate"
+    cmd "remote" help="help for remote" {
+        cmd "list" help="help for list"
+        cmd "unwrap" help="help for list"
+    }
+}
+
+cmd "containers" help="help for containers" {
+    cmd "list" help="help for list"
+    cmd "mount" help="help for list"
+}

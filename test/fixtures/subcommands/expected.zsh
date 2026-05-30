@@ -8,10 +8,6 @@ function _mytool_backup_generate() {
     local ret=1
 
     _arguments -C \
-        '(-o --to-stdout)'-o'[Prints script]' \
-        '(-o --to-stdout)'--to-stdout'[Prints script]' \
-        '(-h --help)'-h'[Display help]' \
-        '(-h --help)'--help'[Display help]' \
         '*:: :->args' && ret=0
 
     return ret
@@ -23,10 +19,6 @@ function _mytool_backup_remote_list() {
     local ret=1
 
     _arguments -C \
-        '(-o --to-stdout)'-o'[Prints script]' \
-        '(-o --to-stdout)'--to-stdout'[Prints script]' \
-        '(-h --help)'-h'[Display help]' \
-        '(-h --help)'--help'[Display help]' \
         '*:: :->args' && ret=0
 
     return ret
@@ -38,13 +30,6 @@ function _mytool_backup_remote_unwrap() {
     local ret=1
 
     _arguments -C \
-        '(-l --latest)'-l'[Fetches latest script]' \
-        '(-l --latest)'--latest'[Fetches latest script]' \
-        '(-o --to-stdout)'-o'[Prints script]' \
-        '(-o --to-stdout)'--to-stdout'[Prints script]' \
-        '(-h --help)'-h'[Display help]' \
-        '(-h --help)'--help'[Display help]' \
-        '1:backup_name:' \
         '*:: :->args' && ret=0
 
     return ret
@@ -122,12 +107,6 @@ function _mytool_containers_list() {
     local ret=1
 
     _arguments -C \
-        '(-n --no-headings)'-n'[Hide headings]' \
-        '(-n --no-headings)'--no-headings'[Hide headings]' \
-        '(-o --to-stdout)'-o'[Prints script]' \
-        '(-o --to-stdout)'--to-stdout'[Prints script]' \
-        '(-h --help)'-h'[Display help]' \
-        '(-h --help)'--help'[Display help]' \
         '*:: :->args' && ret=0
 
     return ret
@@ -139,12 +118,6 @@ function _mytool_containers_mount() {
     local ret=1
 
     _arguments -C \
-        '(-o --to-stdout)'-o'[Prints script]' \
-        '(-o --to-stdout)'--to-stdout'[Prints script]' \
-        '(-h --help)'-h'[Display help]' \
-        '(-h --help)'--help'[Display help]' \
-        '1:container image file:_files' \
-        '2:destination:_files' \
         '*:: :->args' && ret=0
 
     return ret
