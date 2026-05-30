@@ -1,5 +1,6 @@
 #include "kdl_parser.h"
 #include "ast.h"
+#include "node.h"
 #include "node_stack.h"
 #include "string.h"
 #include <kdl.h>
@@ -133,9 +134,25 @@ ParseResult kdl_parse_file(const char *filepath) {
                     } else if (strcmp(current_arg->name, "<precommand>") == 0) {
                         current_arg->type = ARG_TYPE_PRECOMMAND;
                     }
-                } else if (strcmp(current_node_type, "choices") == 0 &&
-                           current_arg) {
-                    node_arg_add_choice(current_arg, val);
+                } else if (strcmp(current_node_type, "choices") == 0) {
+                    Node *current_node = node_stack_peek(node_stack);
+                    if (current_node == NULL) {
+                        break;
+                    }
+                    switch (current_node->type) {
+                    case NODE_ARG:
+                        if (current_arg) {
+                            node_arg_add_choice(current_arg, val);
+                        }
+                        break;
+                    case NODE_FLAG:
+                        if (current_flag) {
+                            node_flag_add_choice(current_flag, val);
+                        }
+                        break;
+                    default:
+                        break;
+                    }
                 }
             }
             break;

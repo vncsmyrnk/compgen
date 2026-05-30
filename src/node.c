@@ -10,11 +10,52 @@ Command *node_create_cmd(const char *name) {
     return cmd;
 }
 
-Flag *node_create_flag(void) { return calloc(1, sizeof(Flag)); }
+void node_choices_add(Choices *choices, const char *choice) {
+    if (!choices) {
+        return;
+    }
+    if (choices->count >= choices->cap) {
+        choices->cap *= 2;
+        choices->values =
+            realloc(choices->values, sizeof(char *) * choices->cap);
+    }
+    choices->values[choices->count++] = string_dup(choice);
+}
 
-char *node_flag_value_name_canonical(Flag *f) {
-    if (f && f->value_name) {
+Choices *node_choices_create(void) {
+    Choices *c = calloc(1, sizeof(Choices));
+    c->cap = 4;
+    c->values = malloc(sizeof(char *) * c->cap);
+    return c;
+}
+
+Flag *node_create_flag(void) {
+    Flag *flag = calloc(1, sizeof(Flag));
+    if (flag) {
+        flag->choices = node_choices_create();
+    }
+    return flag;
+}
+
+void node_flag_add_choice(Flag *flag, const char *choice) {
+    if (!flag || !choice) {
+        return;
+    }
+    node_choices_add(flag->choices, choice);
+}
+
+char *node_flag_name_canonical(Flag *f) {
+    if (!f) {
+        return NULL;
+    }
+    if (f->value_name) {
         return string_slice(f->value_name, 1, -1);
+    }
+    if (f->long_name) {
+        return string_slice(f->long_name, 2, 0);
+    }
+    if (f->short_name) {
+        return string_slice(f->short_name, 1, 0);
     }
     return NULL;
 }
@@ -62,6 +103,10 @@ void node_cmd_print(Command *cmd, int indent, StringBuffer *out) {
                    f->long_name ? f->long_name : "None",
                    f->value_name ? f->value_name : "Bool",
                    f->help ? f->help : "None", f->global ? "True" : "False");
+        for (int i = 0; i < f->choices->count; i++) {
+            sb_appendf(out, "%*s    Choice: %s\n", indent, "",
+                       f->choices->values[i]);
+        }
         f = f->next;
     }
 
@@ -83,6 +128,7 @@ void node_flag_free(Flag *f) {
         free(f->help);
         free(f->value_name);
         free(f->run);
+        node_choices_free(f->choices);
         free(f);
     }
 }
@@ -120,4 +166,12 @@ void node_cmd_free(Command *cmd) {
         }
         free(cmd);
     }
+}
+
+void node_choices_free(Choices *choices) {
+    for (int i = 0; i < choices->count; i++) {
+        free(choices->values[i]);
+    }
+    free(choices->values);
+    free(choices);
 }

@@ -9,4 +9,7 @@ cmd "checkout" help="Switch branches or restore working tree files" {
     flag "--ours" help="When checking out paths from the index, check out stage #2 for unmerged paths."
     flag "-f --file <file>" help="File flag example"
     flag "-d --dir <dir>" help="Dir flag example"
+    flag "-s --shell <shell>" help="Target shell" {
+        choices "zsh" "bash"
+    }
 }

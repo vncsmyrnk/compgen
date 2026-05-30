@@ -1,5 +1,4 @@
 #include "node_stack.h"
-#include "ast.h"
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -59,6 +58,13 @@ Node *node_stack_pop(NodeStack *s) {
     s->top = s->top->next;
     free(current_top);
     return top_node;
+}
+
+Node *node_stack_peek(NodeStack *s) {
+    if (!s->top) {
+        return NULL;
+    }
+    return s->top->node;
 }
 
 Node *node_stack_free(NodeStack *s) {

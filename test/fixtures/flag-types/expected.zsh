@@ -8,6 +8,8 @@ function _mytool_checkout() {
     local ret=1
 
     _arguments -C \
+        '(-s --shell)'-s'=[Target shell]:shell:(zsh bash)' \
+        '(-s --shell)'--shell'=[Target shell]:shell:(zsh bash)' \
         '(-d --dir)'-d'[Dir flag example]:dir:_files -/' \
         '(-d --dir)'--dir'[Dir flag example]:dir:_files -/' \
         '(-f --file)'-f'[File flag example]:file:_files' \

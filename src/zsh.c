@@ -28,24 +28,40 @@ static void gen_single_flag(Flag *f, const char *flag_name, StringBuffer *out) {
     sb_append(out, flag_name);
     sb_append(out, "'");
 
-    if (f->help)
+    if (f->choices->count > 0) {
+        sb_appendf(out, "=", f->help);
+    }
+
+    if (f->help) {
         sb_appendf(out, "[%s]", f->help);
+    }
 
-    char *flag_value_name_canonical = node_flag_value_name_canonical(f);
-    if (flag_value_name_canonical)
-        sb_appendf(out, ":%s:", flag_value_name_canonical);
+    char *flag_name_canonical = node_flag_name_canonical(f);
+    if (!flag_name_canonical || !f->value_name) {
+        free(flag_name_canonical);
+        sb_append(out, "' \\\n");
+        return;
+    }
 
+    sb_appendf(out, ":%s:", flag_name_canonical);
     if (f->run) {
-        sb_appendf(out, "->action_%s", flag_value_name_canonical);
-    } else if (flag_value_name_canonical) {
-        if (strcmp(flag_value_name_canonical, "file") == 0) {
+        sb_appendf(out, "->action_%s", flag_name_canonical);
+    } else if (flag_name_canonical) {
+        if (strcmp(flag_name_canonical, "file") == 0) {
             sb_append(out, "_files");
-        } else if (strcmp(flag_value_name_canonical, "dir") == 0) {
+        } else if (strcmp(flag_name_canonical, "dir") == 0) {
             sb_append(out, "_files -/");
+        } else if (f->choices->count > 0) {
+            sb_append(out, "(");
+            for (int i = 0; i < f->choices->count; i++) {
+                sb_appendf(out, "%s ", f->choices->values[i]);
+            }
+            sb_slice(out, 0, -1);
+            sb_append(out, ")");
         }
     }
 
-    free(flag_value_name_canonical);
+    free(flag_name_canonical);
     sb_append(out, "' \\\n");
 }
 
@@ -225,18 +241,17 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
                     case_state_run_statement_added = true;
                 }
 
-                char *flag_value_name_canonical =
-                    node_flag_value_name_canonical(f);
+                char *flag_name_canonical = node_flag_name_canonical(f);
 
                 indent(out, 2);
-                sb_appendf(out, "action_%s)\n", flag_value_name_canonical);
+                sb_appendf(out, "action_%s)\n", flag_name_canonical);
 
                 indent(out, 3);
                 sb_append(out, "local -a choices\n");
                 indent(out, 3);
                 sb_appendf(out, "choices=(${(f)\"$(_call_program %s %s)\"})\n",
-                           flag_value_name_canonical, f->run);
-                free(flag_value_name_canonical);
+                           flag_name_canonical, f->run);
+                free(flag_name_canonical);
 
                 indent(out, 3);
                 sb_appendf(out, "compadd -a choices && ret=0\n");

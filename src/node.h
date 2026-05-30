@@ -4,6 +4,12 @@
 #include "string_builder.h"
 #include <stdbool.h>
 
+typedef struct {
+    char **values; // Array of strings: ["start", "stop", "restart"]
+    int count;     // How many choices exist
+    int cap;       // Internal capacity for the array
+} Choices;
+
 // Represents a command-line flag
 typedef struct Flag {
     char *short_name; // e.g., "-v"
@@ -11,6 +17,7 @@ typedef struct Flag {
     char *help;       // e.g., "Enable output"
     char *value_name; // e.g., "<PORT>" (NULL means boolean flag)
     char *run;        // Shell command to generate choices dynamically
+    Choices *choices; // Makes any sense to this be a pointer?
     bool global;
     struct Flag *next; // Pointer to the next flag
 } Flag;
@@ -57,7 +64,8 @@ typedef struct {
 
 Command *node_create_cmd(const char *name);
 Flag *node_create_flag(void);
-char *node_flag_value_name_canonical(Flag *f);
+void node_flag_add_choice(Flag *flag, const char *choice);
+char *node_flag_name_canonical(Flag *f);
 Arg *node_create_arg(const char *name);
 void node_arg_add_choice(Arg *arg, const char *choice);
 char *node_arg_name_canonical(Arg *a);
@@ -65,5 +73,6 @@ void node_cmd_print(Command *cmd, int indent, StringBuffer *out);
 void node_flag_free(Flag *f);
 void node_arg_free(Arg *a);
 void node_cmd_free(Command *cmd);
+void node_choices_free(Choices *choices);
 
 #endif // NODE_H
