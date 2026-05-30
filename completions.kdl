@@ -1,0 +1,11 @@
+name "cg"
+help "Shell completions generator"
+
+flag "-h --help" help="Prints information useful to debug the completion generation"
+flag "-v --version" help="Prints version"
+
+flag "-s --shell <shell>" help="Target shell" {
+    choices "zsh"
+}
+
+arg "<file>" help="KDL configuration file path"

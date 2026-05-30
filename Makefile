@@ -14,14 +14,21 @@ OBJS = $(SRCS:.c=.o)
 
 OUTPUT = $(SRCDIR)/build
 TARGET = $(OUTPUT)/cg
+ZSH_COMPLETION = $(OUTPUT)/_cg
 
 PREFIX ?= /usr
 DESTDIR ?=
 
+DATAROOTDIR = $(PREFIX)/share
+DATADIR = $(DATAROOTDIR)
 BINDIR = $(PREFIX)/bin
+MANDIR = $(DATAROOTDIR)/man
+MANDIR1 = $(MANDIR)/man1
+ZSHDIR = $(DATAROOTDIR)/zsh
 
 INSTALL ?= install
 INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA = $(INSTALL) -m 644
 
 TEST_BIN = $(OUTPUT)/test_runner
 TEST_SRCS = $(wildcard $(SRCDIR)/test/*.c) $(filter-out $(SRCDIR)/src/main.c, $(SRCS))
@@ -34,14 +41,20 @@ $(TARGET): $(OBJS)
 	@mkdir -p $(OUTPUT)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDLIBS)
 
+$(ZSH_COMPLETION): completions.kdl $(TARGET)
+	$(TARGET) --shell zsh $< > $@
+
 .PHONY: install
-install: all
+install: all $(ZSH_COMPLETION)
 	$(INSTALL) -d $(DESTDIR)$(BINDIR)
+	$(INSTALL) -d $(DESTDIR)$(ZSHDIR)/site-functions
+	$(INSTALL_DATA) $(ZSH_COMPLETION) $(DESTDIR)$(ZSHDIR)/site-functions
 	$(INSTALL_PROGRAM) $(TARGET) $(DESTDIR)$(BINDIR)
 
 .PHONY: uninstall
 uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/cg
+	rm -f $(DESTDIR)$(ZSHDIR)/site-functions/_cg
 
 .PHONY: dist
 dist:
