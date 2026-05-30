@@ -39,6 +39,10 @@ install: all
 	$(INSTALL) -d $(DESTDIR)$(BINDIR)
 	$(INSTALL_PROGRAM) $(TARGET) $(DESTDIR)$(BINDIR)
 
+.PHONY: uninstall
+uninstall:
+	rm -f $(DESTDIR)$(BINDIR)/compgen
+
 .PHONY: dist
 dist:
 	@echo "Packaging source for $(VERSION)..."
