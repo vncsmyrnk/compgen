@@ -56,7 +56,9 @@ int main(int argc, char **argv) {
     }
 
     if (argparse_get_bool(parser, "debug")) {
+        argparse_free(parser);
         ast_debug_print(r.ast);
+        kdl_free_result(&r);
         return EXIT_SUCCESS;
     }
 
@@ -64,12 +66,15 @@ int main(int argc, char **argv) {
     if (strcmp(argparse_get_str(parser, "shell"), "zsh") == 0) {
         generate(r.ast, &generated_completion);
     }
+    argparse_free(parser);
 
     if (strcmp(generated_completion.data, "") == 0) {
+        sb_free(&generated_completion);
+        kdl_free_result(&r);
         return EXIT_FAILURE;
     }
-    printf("%s\n", generated_completion.data);
 
+    printf("%s\n", generated_completion.data);
     sb_free(&generated_completion);
     kdl_free_result(&r);
     return EXIT_SUCCESS;
