@@ -4,6 +4,8 @@ VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || cat VERSI
 
 CC = gcc
 CFLAGS = $(shell cat $(SRCDIR)/compile_flags.txt) -DVERSION=\"$(VERSION)\"
+CFLAGS_RELEASE = -O2
+CFLAGS_DEBUG = -g -O0 -fsanitize=address -fno-omit-frame-pointer
 LDLIBS = -lm
 
 SRCS = $(wildcard $(SRCDIR)/src/*.c) $(wildcard $(SRCDIR)/vendor/ckdl/src/*.c)
@@ -25,9 +27,9 @@ TEST_BIN = $(OUTPUT)/test_runner
 TEST_SRCS = $(wildcard $(SRCDIR)/test/*.c) $(filter-out $(SRCDIR)/src/main.c, $(SRCS))
 TEST_OBJS = $(TEST_SRCS:.c=.o)
 
+all: CFLAGS += $(CFLAGS_RELEASE)
 all: $(TARGET)
 
-$(TARGET): CFLAGS += -O2
 $(TARGET): $(OBJS)
 	@mkdir -p $(OUTPUT)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDLIBS)
@@ -51,7 +53,11 @@ $(TEST_BIN): $(TEST_OBJS)
 	@mkdir -p $(OUTPUT)
 	$(CC) $(CFLAGS) -o $@ $(TEST_OBJS) $(LDLIBS)
 
-.PHONY: test
+.PHONY: debug
+debug: CFLAGS += $(CFLAGS_DEBUG)
+debug: $(TARGET)
+
+.PHONY: check
 check: all $(TEST_BIN)
 	LSAN_OPTIONS=suppressions=lsan_suppressions.txt ./$(TEST_BIN)
 
