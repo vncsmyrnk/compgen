@@ -13,7 +13,7 @@ ALL_SRCS = $(wildcard $(SRCDIR)/src/*.c) $(wildcard $(SRCDIR)/vendor/ckdl/src/*.
 OBJS = $(SRCS:.c=.o)
 
 OUTPUT = $(SRCDIR)/.out
-TARGET = $(OUTPUT)/compgen
+TARGET = $(OUTPUT)/cg
 
 PREFIX ?= /usr
 DESTDIR ?=
@@ -41,7 +41,7 @@ install: all
 
 .PHONY: uninstall
 uninstall:
-	rm -f $(DESTDIR)$(BINDIR)/compgen
+	rm -f $(DESTDIR)$(BINDIR)/cg
 
 .PHONY: dist
 dist:
