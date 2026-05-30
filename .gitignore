@@ -1,6 +1,7 @@
 *.o
 *.out
 dist
+build
 result
 test/fixtures/*.actual.*
 VERSION

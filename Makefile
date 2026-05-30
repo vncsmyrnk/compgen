@@ -12,7 +12,7 @@ SRCS = $(wildcard $(SRCDIR)/src/*.c) $(wildcard $(SRCDIR)/vendor/ckdl/src/*.c)
 ALL_SRCS = $(wildcard $(SRCDIR)/src/*.c) $(wildcard $(SRCDIR)/vendor/ckdl/src/*.c) $(wildcard $(SRCDIR)/test/*.c)
 OBJS = $(SRCS:.c=.o)
 
-OUTPUT = $(SRCDIR)/.out
+OUTPUT = $(SRCDIR)/build
 TARGET = $(OUTPUT)/cg
 
 PREFIX ?= /usr
