@@ -23,6 +23,8 @@ This project's intent is to also define a specification for the completion gener
 - [ ] Document usage for users
 - [ ] Document requirements and guidelines and for more shells
 
+[v0.1.0 Milestone](https://github.com/vncsmyrnk/compgen/milestone/1)
+
 ## Install
 
 ### From source
