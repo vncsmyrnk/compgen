@@ -65,7 +65,7 @@ dist:
 	tar -czvf compgen-$(VERSION).tar.gz compgen-$(VERSION)
 	@rm -rf compgen-$(VERSION)
 
-$(TEST_BIN): CFLAGS += -g -O0 -fsanitize=address -fno-omit-frame-pointer
+$(TEST_BIN): CFLAGS += $(CFLAGS_DEBUG)
 $(TEST_BIN): $(TEST_OBJS)
 	@mkdir -p $(OUTPUT)
 	$(CC) $(CFLAGS) -o $@ $(TEST_OBJS) $(LDLIBS)
