@@ -147,7 +147,7 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
                 char *arg_name_canonical = node_arg_name_canonical(a);
                 indent(out, 2);
                 sb_appendf(out, "'%d:%s:", arg_index, arg_name_canonical);
-                if (a->run || a->choice_count > 0) {
+                if (a->run || a->choices->count > 0) {
                     sb_appendf(out, "->action_%s", arg_name_canonical);
                 }
                 sb_appendf(out, "' \\\n", arg_name_canonical);
@@ -200,7 +200,7 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
 
                 indent(out, 3);
                 sb_append(out, ";;\n");
-            } else if (a->choice_count > 0) {
+            } else if (a->choices->count > 0) {
                 if (!case_state_run_statement_added) {
                     indent(out, 1);
                     sb_append(out, "case $state in\n");
@@ -217,8 +217,8 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
 
                 indent(out, 3);
                 sb_append(out, "choices=(");
-                for (int i = 0; i < a->choice_count; i++) {
-                    sb_appendf(out, "\"%s\" ", a->choices[i]);
+                for (int i = 0; i < a->choices->count; i++) {
+                    sb_appendf(out, "\"%s\" ", a->choices->values[i]);
                 }
                 sb_slice(out, 0, -1);
                 sb_append(out, ")\n");

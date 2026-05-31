@@ -64,8 +64,7 @@ Arg *node_create_arg(const char *name) {
     Arg *arg = calloc(1, sizeof(Arg));
     if (arg) {
         arg->name = string_dup(name);
-        arg->choice_cap = 4; // Start with space for 4 choices
-        arg->choices = malloc(sizeof(char *) * arg->choice_cap);
+        arg->choices = node_choices_create();
     }
     return arg;
 }
@@ -80,12 +79,7 @@ char *node_arg_name_canonical(Arg *a) {
 void node_arg_add_choice(Arg *arg, const char *choice) {
     if (!arg || !choice)
         return;
-
-    if (arg->choice_count >= arg->choice_cap) {
-        arg->choice_cap *= 2;
-        arg->choices = realloc(arg->choices, sizeof(char *) * arg->choice_cap);
-    }
-    arg->choices[arg->choice_count++] = string_dup(choice);
+    node_choices_add(arg->choices, choice);
 }
 
 void node_cmd_print(Command *cmd, int indent, StringBuffer *out) {
@@ -114,8 +108,9 @@ void node_cmd_print(Command *cmd, int indent, StringBuffer *out) {
     while (a) {
         sb_appendf(out, "%*s  Arg: %s (Help: %s)\n", indent, "",
                    a->name ? a->name : "None", a->help ? a->help : "None");
-        for (int i = 0; i < a->choice_count; i++) {
-            sb_appendf(out, "%*s    Choice: %s\n", indent, "", a->choices[i]);
+        for (int i = 0; i < a->choices->count; i++) {
+            sb_appendf(out, "%*s    Choice: %s\n", indent, "",
+                       a->choices->values[i]);
         }
         a = a->next;
     }
@@ -137,11 +132,8 @@ void node_arg_free(Arg *a) {
     if (a) {
         free(a->name);
         free(a->help);
-        for (int i = 0; i < a->choice_count; i++) {
-            free(a->choices[i]);
-        }
-        free(a->choices);
         free(a->run);
+        node_choices_free(a->choices);
         free(a);
     }
 }

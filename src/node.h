@@ -36,9 +36,7 @@ typedef struct Arg {
     char *name; // e.g., "<action>"
     char *help; // e.g., "The action to perform"
     ArgType type;
-    char **choices;   // Array of strings: ["start", "stop", "restart"]
-    int choice_count; // How many choices exist
-    int choice_cap;   // Internal capacity for the array
+    Choices *choices;
     char *run;        // Shell command to generate choices dynamically
     struct Arg *next; // Pointer to the next flag
 } Arg;
