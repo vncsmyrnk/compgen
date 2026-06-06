@@ -158,11 +158,12 @@ ParseResult kdl_parse_file(const char *filepath) {
             break;
 
         case KDL_EVENT_PROPERTY:
+            char prop_name[256];
+            snprintf(prop_name, sizeof(prop_name), "%.*s", (int)event->name.len,
+                     event->name.data);
+
             if (event->value.type == KDL_TYPE_STRING) {
-                char prop_name[256];
                 char prop_val[256];
-                snprintf(prop_name, sizeof(prop_name), "%.*s",
-                         (int)event->name.len, event->name.data);
                 snprintf(prop_val, sizeof(prop_val), "%.*s",
                          (int)event->value.string.len,
                          event->value.string.data);
@@ -186,8 +187,17 @@ ParseResult kdl_parse_file(const char *filepath) {
                     }
                 }
             } else if (event->value.type == KDL_TYPE_BOOLEAN) {
-                if (strcmp(current_node_type, "flag") == 0 && current_flag) {
+                if (strcmp(prop_name, "global") == 0 &&
+                    strcmp(current_node_type, "flag") == 0 && current_flag) {
                     current_flag->global = event->value.boolean;
+                } else if (strcmp(prop_name, "multiple") == 0) {
+                    if (strcmp(current_node_type, "flag") == 0 &&
+                        current_flag) {
+                        current_flag->multiple = event->value.boolean;
+                    } else if (strcmp(current_node_type, "arg") == 0 &&
+                               current_arg) {
+                        current_arg->multiple = event->value.boolean;
+                    }
                 }
             }
             break;

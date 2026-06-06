@@ -14,4 +14,7 @@ cmd "checkout" help="Switch branches or restore working tree files" {
     }
     flag "-V" help="Verbose output"
     flag "--name <string>" help="Name"
+    flag "-m --file-mult <file>" help="Variadic file flag example" multiple=#true
+    flag "--multiple-files <file>" help="Variadic long-only file flag example" multiple=#true
+    flag "-i <file>" help="Variadic short-only file flag example" multiple=#true
 }

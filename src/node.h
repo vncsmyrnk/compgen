@@ -19,6 +19,7 @@ typedef struct Flag {
     char *run;        // Shell command to generate choices dynamically
     Choices *choices; // Makes any sense to this be a pointer?
     bool global;
+    bool multiple;
     struct Flag *next; // Pointer to the next flag
 } Flag;
 
@@ -37,7 +38,8 @@ typedef struct Arg {
     char *help; // e.g., "The action to perform"
     ArgType type;
     Choices *choices;
-    char *run;        // Shell command to generate choices dynamically
+    char *run; // Shell command to generate choices dynamically
+    bool multiple;
     struct Arg *next; // Pointer to the next flag
 } Arg;
 

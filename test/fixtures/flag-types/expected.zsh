@@ -8,6 +8,9 @@ function _mytool_checkout() {
     local ret=1
 
     _arguments -C \
+        '*'-i'=[Variadic short-only file flag example]:file:_files' \
+        '*'--multiple-files'=[Variadic long-only file flag example]:file:_files' \
+        '*'{-m,--file-mult}'=[Variadic file flag example]:file:_files' \
         --name'=[Name]:string:' \
         -V'[Verbose output]' \
         '(-s --shell)'{-s,--shell}'=[Target shell]:shell:(zsh bash)' \

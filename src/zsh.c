@@ -15,23 +15,40 @@ static void indent(StringBuffer *out, int level) {
 }
 
 static void gen_flag(Flag *f, StringBuffer *out) {
-    if (f->short_name && f->long_name) {
-        indent(out, 2);
-        sb_appendf(out, "'(%s %s)'{%s,%s}", f->short_name, f->long_name,
-                   f->short_name, f->long_name);
-    } else if (f->short_name) {
-        indent(out, 2);
-        sb_append(out, f->short_name);
-    } else if (f->long_name) {
-        indent(out, 2);
-        sb_append(out, f->long_name);
-    } else {
+    if (!f || (!f->short_name && !f->long_name)) {
         return;
+    }
+
+    bool flag_expects_values = f->choices->count > 0 || f->value_name || f->run;
+    bool multiple = f->multiple;
+
+    if (multiple && !flag_expects_values) {
+        multiple = false;
+    }
+
+    indent(out, 2);
+
+    if (f->short_name && f->long_name) {
+        if (multiple) {
+            sb_appendf(out, "'*'{%s,%s}", f->short_name, f->long_name,
+                       f->short_name, f->long_name);
+        } else {
+            sb_appendf(out, "'(%s %s)'{%s,%s}", f->short_name, f->long_name,
+                       f->short_name, f->long_name);
+        }
+    } else {
+        if (multiple) {
+            sb_append(out, "'*'");
+        }
+        if (f->short_name) {
+            sb_append(out, f->short_name);
+        } else if (f->long_name) {
+            sb_append(out, f->long_name);
+        }
     }
 
     sb_append(out, "'");
 
-    bool flag_expects_values = f->choices->count > 0 || f->value_name || f->run;
     if (flag_expects_values) {
         sb_append(out, "=");
     }
