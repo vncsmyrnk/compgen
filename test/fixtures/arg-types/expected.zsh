@@ -131,6 +131,17 @@ function _mytool_mv() {
     return ret
 }
 
+function _mytool_add() {
+    local context state state_descr line
+    typeset -A opt_args
+    local ret=1
+
+    _arguments -C \
+        '*:Files to be staged:_files' && ret=0
+
+    return ret
+}
+
 function _mytool() {
     local context state state_descr line
     typeset -A opt_args
@@ -151,6 +162,7 @@ function _mytool() {
                 'generate:Generate a completion file'
                 'exec:The action to perform'
                 'mv:Rename SOURCE to DEST, or move SOURCE(s) to DIRECTORY'
+                'add:Add contents  of  new or changed files to the index'
             )
             _describe 'commands' choices && ret=0
             ;;
@@ -176,6 +188,9 @@ function _mytool() {
                     ;;
                 mv)
                     _mytool_mv "$@" && ret=0
+                    ;;
+                add)
+                    _mytool_add "$@" && ret=0
                     ;;
             esac
             ;;

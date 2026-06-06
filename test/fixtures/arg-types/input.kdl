@@ -33,3 +33,7 @@ cmd "mv" help="Rename SOURCE to DEST, or move SOURCE(s) to DIRECTORY" {
     arg "<file>" help="Source file"
     arg "<file>" help="Destination file"
 }
+
+cmd "add" help="Add contents  of  new or changed files to the index" {
+    arg "<file>" help="Files to be staged" multiple=#true
+}

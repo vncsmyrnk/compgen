@@ -136,43 +136,62 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
             global_item = global_item->next;
         }
 
-        Arg *a = cmd->args;
         int arg_index = 1;
+        bool any_multiple_arg_defined = false;
+
+        Arg *a = cmd->args;
         while (a) {
+            if (a->type == ARG_TYPE_PRECOMMAND) {
+                // No other argument is expected after
+                // this type as it generates suggestions
+                // for the following command
+                break;
+            }
+
+            indent(out, 2);
+            sb_append(out, "'");
+            if (a->multiple) {
+                sb_append(out, "*");
+                any_multiple_arg_defined = true;
+            } else {
+                sb_appendf(out, "%d", arg_index);
+            }
+
             switch (a->type) {
             case ARG_TYPE_INT:
-                indent(out, 2);
-                sb_appendf(out, "'%d:%s:_guard \"[0-9]#\"' \\\n", arg_index,
-                           a->help);
+                sb_appendf(out, ":%s:_guard \"[0-9]#\"", a->help);
                 break;
             case ARG_TYPE_FILE:
-                indent(out, 2);
-                sb_appendf(out, "'%d:%s:_files' \\\n", arg_index, a->help);
+                sb_appendf(out, ":%s:_files", a->help);
                 break;
             case ARG_TYPE_DIR:
-                indent(out, 2);
-                sb_appendf(out, "'%d:%s:_files -/' \\\n", arg_index, a->help);
-                break;
-            case ARG_TYPE_PRECOMMAND: // No other argument is expected after
-                                      // this type as it generates suggestions
-                                      // for the following command
+                sb_appendf(out, ":%s:_files -/", a->help);
                 break;
             default:
                 char *arg_name_canonical = node_arg_name_canonical(a);
-                indent(out, 2);
-                sb_appendf(out, "'%d:%s:", arg_index, arg_name_canonical);
+                sb_appendf(out, ":%s:", arg_name_canonical);
                 if (a->run || a->choices->count > 0) {
                     sb_appendf(out, "->action_%s", arg_name_canonical);
                 }
-                sb_appendf(out, "' \\\n", arg_name_canonical);
                 free(arg_name_canonical);
             }
+
+            if (a->multiple) {
+                // No other argument is expected after
+                // this type as it defines variadic completions
+                sb_append(out, "' && ret=0\n\n");
+                break;
+            }
+            sb_append(out, "' \\\n");
+
             arg_index++;
             a = a->next;
         }
 
-        indent(out, 2);
-        sb_append(out, "'*:: :->args' && ret=0\n\n");
+        if (!any_multiple_arg_defined) {
+            indent(out, 2);
+            sb_append(out, "'*:: :->args' && ret=0\n\n");
+        }
 
         bool case_state_run_statement_added = false;
         a = cmd->args;
