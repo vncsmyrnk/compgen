@@ -3,6 +3,9 @@
 
 # compgen
 
+> [!WARNING]
+> This is the _unstable_ branch. This branch has experimental code, which will eventually (or not) be released upstream. Do not expect all functionalities present here to be pushed upstream at some point.
+
 **Goal**: a runtime dependency-free completions generator for multiple shells configurable via document language.
 
 **Inspiration**: [jdx/usage](https://github.com/jdx/usage). `usage` is a great tool and it is a runtime dependency.
