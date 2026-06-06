@@ -320,6 +320,10 @@ kdl_event_data *kdl_parser_next_event(kdl_parser *self) {
     }
 }
 
+KDL_EXPORT char const *kdl_parser_get_position(kdl_parser *self) {
+    return kdl_tokenizer_get_position(self->tokenizer);
+}
+
 static kdl_event_data *_apply_slashdash(kdl_parser *self) {
     if (self->slashdash_depth >= 0) {
         // slashdash is active

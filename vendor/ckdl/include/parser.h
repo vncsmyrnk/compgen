@@ -62,6 +62,9 @@ KDL_EXPORT void kdl_destroy_parser(kdl_parser *parser);
 // it contains!) is invalidated on the next call.
 KDL_EXPORT kdl_event_data *kdl_parser_next_event(kdl_parser *parser);
 
+// Get the current position of the parser
+KDL_EXPORT char const *kdl_parser_get_position(kdl_parser *parser);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

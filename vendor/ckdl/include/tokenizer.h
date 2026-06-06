@@ -75,6 +75,9 @@ KDL_EXPORT void kdl_tokenizer_set_character_set(kdl_tokenizer *tokenizer,
 KDL_EXPORT kdl_tokenizer_status kdl_pop_token(kdl_tokenizer *tokenizer,
                                               kdl_token *dest);
 
+// Get the current position of the tokenizer
+KDL_EXPORT char const *kdl_tokenizer_get_position(kdl_tokenizer *tokenizer);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif // __cplusplus

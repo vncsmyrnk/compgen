@@ -1,9 +1,29 @@
 #define _POSIX_C_SOURCE 200112L
 #include "../src/parser.h"
 #include "test.h"
-#include <stdlib.h>
+#include <stdio.h>
 
-TEST(test_kdl_node_limit_respected) {
+void write_test_kdl(const char *path, const char *content) {
+    FILE *f = fopen(path, "w");
+    fprintf(f, "%s", content);
+    fclose(f);
+}
+
+TEST(parser_validation_invalid_node) {
+    const char *path = "test_invalid_node.kdl";
+    write_test_kdl(path, "name \"tool\"\nunknown_node \"test\"\n");
+
+    ParseResult res = parse_file(path);
+    ASSERT_INT_EQ(PARSER_RESULT_ERR_VALIDATION_FAILED, res.status);
+    ASSERT_NOT_NULL(res.error_message);
+    ASSERT_STR_EQ("Error at line 2: Invalid node type 'unknown_node'.",
+                  res.error_message);
+
+    free_result(&res);
+    remove(path);
+}
+
+TEST(parser_node_limit_respected) {
     const char *test_kdl = "test_limit.kdl";
     FILE *f = fopen(test_kdl, "w");
     fprintf(f, "cmd \"test\" {\n");

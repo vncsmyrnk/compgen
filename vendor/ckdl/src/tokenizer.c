@@ -368,6 +368,10 @@ kdl_tokenizer_status kdl_pop_token(kdl_tokenizer *self, kdl_token *dest) {
     }
 }
 
+KDL_EXPORT char const *kdl_tokenizer_get_position(kdl_tokenizer *self) {
+    return self->document.data;
+}
+
 static kdl_tokenizer_status _pop_word(kdl_tokenizer *self, kdl_token *dest) {
     uint32_t c = 0;
     char const *cur = self->document.data;

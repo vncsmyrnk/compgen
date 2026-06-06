@@ -54,6 +54,9 @@ int main(int argc, char **argv) {
                 "Error: Node limit exceeded. You can configure the limit by "
                 "setting the COMPGEN_MAX_NODES environment variable.\n");
             break;
+        case PARSER_RESULT_ERR_VALIDATION_FAILED:
+            fprintf(stderr, "%s\n", r.error_message);
+            break;
         default:
             fprintf(stderr, "Error: unexpected failure.\n");
         }

@@ -8,12 +8,25 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *read_file(const char *filename) {
+int get_line_number(const char *text, const char *ptr, long text_len) {
+    if (!text || !ptr || ptr < text || ptr >= text + text_len)
+        return -1;
+    int line = 1;
+    for (const char *c = text; c < ptr; c++) {
+        if (*c == '\n')
+            line++;
+    }
+    return line;
+}
+
+char *read_file(const char *filename, long *out_length) {
     FILE *f = fopen(filename, "rb");
     if (!f)
         return NULL;
     fseek(f, 0, SEEK_END);
     long length = ftell(f);
+    if (out_length)
+        *out_length = length;
     fseek(f, 0, SEEK_SET);
     char *buffer = malloc(length + 1);
     if (buffer) {
@@ -26,9 +39,11 @@ char *read_file(const char *filename) {
 
 ParseResult parse_file(const char *filepath) {
     AST *ast = ast_init(NULL);
-    ParseResult res = {.ast = ast, .status = PARSER_RESULT_OK};
+    ParseResult res = {
+        .ast = ast, .status = PARSER_RESULT_OK, .error_message = NULL};
 
-    char *kdl_text = read_file(filepath);
+    long kdl_text_len = 0;
+    char *kdl_text = read_file(filepath, &kdl_text_len);
     if (!kdl_text) {
         res.status = PARSER_RESULT_ERR_FILE_NOT_FOUND;
         return res;
@@ -101,6 +116,21 @@ ParseResult parse_file(const char *filepath) {
                     }
                     a->next = current_arg;
                 }
+            } else if (strcmp(current_node_type, "name") == 0 ||
+                       strcmp(current_node_type, "help") == 0 ||
+                       strcmp(current_node_type, "choices") == 0) {
+                // Supported metadata nodes, no structural validation needed
+                // here as they are handled in ARGUMENT/PROPERTY events or
+                // ignored if misplaced.
+            } else {
+                int line = get_line_number(
+                    kdl_text, kdl_parser_get_position(parser), kdl_text_len);
+                res.status = PARSER_RESULT_ERR_VALIDATION_FAILED;
+                res.error_message = malloc(256);
+                snprintf(res.error_message, 256,
+                         "Error at line %d: Invalid node type '%s'.", line,
+                         current_node_type);
+                goto cleanup;
             }
 
             break;
@@ -240,4 +270,9 @@ cleanup:
     return res;
 }
 
-void free_result(ParseResult *r) { ast_free(r->ast); }
+void free_result(ParseResult *r) {
+    ast_free(r->ast);
+    if (r->error_message) {
+        free(r->error_message);
+    }
+}
