@@ -1,7 +1,7 @@
-#include "kdl_parser.h"
 #include "ast.h"
 #include "node.h"
 #include "node_stack.h"
+#include "parser.h"
 #include "string.h"
 #include <kdl.h>
 #include <stdio.h>
@@ -24,13 +24,13 @@ char *read_file(const char *filename) {
     return buffer;
 }
 
-ParseResult kdl_parse_file(const char *filepath) {
+ParseResult parse_file(const char *filepath) {
     AST *ast = ast_init(NULL);
-    ParseResult res = {.ast = ast, .status = KDL_RESULT_OK};
+    ParseResult res = {.ast = ast, .status = PARSER_RESULT_OK};
 
     char *kdl_text = read_file(filepath);
     if (!kdl_text) {
-        res.status = KDL_RESULT_ERR_FILE_NOT_FOUND;
+        res.status = PARSER_RESULT_ERR_FILE_NOT_FOUND;
         return res;
     }
 
@@ -38,7 +38,7 @@ ParseResult kdl_parse_file(const char *filepath) {
         kdl_create_string_parser(kdl_str_from_cstr(kdl_text), 0);
     if (!parser) {
         free(kdl_text);
-        res.status = KDL_RESULT_ERR_PARSE_FAILED;
+        res.status = PARSER_RESULT_ERR_PARSE_FAILED;
         return res;
     }
 
@@ -226,4 +226,4 @@ ParseResult kdl_parse_file(const char *filepath) {
     return res;
 }
 
-void kdl_free_result(ParseResult *r) { ast_free(r->ast); }
+void free_result(ParseResult *r) { ast_free(r->ast); }

@@ -1,6 +1,6 @@
 #include "argparse.h"
 #include "ast.h"
-#include "kdl_parser.h"
+#include "parser.h"
 #include "shell.h"
 #include "version.h"
 #include <stdio.h>
@@ -36,29 +36,29 @@ int main(int argc, char **argv) {
     }
 
     const char *file_path = argparse_positional_at(parser, 0);
-    ParseResult r = kdl_parse_file(file_path);
-    if (r.status != KDL_RESULT_OK) {
+    ParseResult r = parse_file(file_path);
+    if (r.status != PARSER_RESULT_OK) {
         switch (r.status) {
-        case KDL_RESULT_ERR_FILE_NOT_FOUND:
+        case PARSER_RESULT_ERR_FILE_NOT_FOUND:
             fprintf(stderr, "Error: Could not read test.kdl\n");
             break;
-        case KDL_RESULT_ERR_FAILED_TO_CREATE_PARSER:
+        case PARSER_RESULT_ERR_FAILED_TO_CREATE_PARSER:
             fprintf(stderr, "Error: Failed to create KDL parser.\n");
             break;
-        case KDL_RESULT_ERR_PARSE_FAILED:
+        case PARSER_RESULT_ERR_PARSE_FAILED:
             fprintf(stderr, "Error: unable to parse KDL file.\n");
             break;
         default:
             fprintf(stderr, "Error: unexpected failure.\n");
         }
-        kdl_free_result(&r);
+        free_result(&r);
         return EXIT_FAILURE;
     }
 
     if (argparse_get_bool(parser, "debug")) {
         argparse_free(parser);
         ast_debug_print(r.ast);
-        kdl_free_result(&r);
+        free_result(&r);
         return EXIT_SUCCESS;
     }
 
@@ -70,12 +70,12 @@ int main(int argc, char **argv) {
 
     if (strcmp(generated_completion.data, "") == 0) {
         sb_free(&generated_completion);
-        kdl_free_result(&r);
+        free_result(&r);
         return EXIT_FAILURE;
     }
 
     printf("%s\n", generated_completion.data);
     sb_free(&generated_completion);
-    kdl_free_result(&r);
+    free_result(&r);
     return EXIT_SUCCESS;
 }

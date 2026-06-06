@@ -1,12 +1,12 @@
-#include "../src/kdl_parser.h"
+#include "../src/parser.h"
 #include "../src/shell.h"
 #include "../src/string_builder.h"
 #include "test.h"
 
 TEST(zsh_subcommands) {
-    ParseResult r = kdl_parse_file("./test/fixtures/subcommands/input.kdl");
+    ParseResult r = parse_file("./test/fixtures/subcommands/input.kdl");
     ASSERT_NOT_NULL(r.ast);
-    ASSERT_INT_EQ(KDL_RESULT_OK, r.status);
+    ASSERT_INT_EQ(PARSER_RESULT_OK, r.status);
 
     char *expected_zsh =
         load_file_to_string("./test/fixtures/subcommands/expected.zsh");
@@ -20,13 +20,13 @@ TEST(zsh_subcommands) {
 
     free(expected_zsh);
     sb_free(&out);
-    kdl_free_result(&r);
+    free_result(&r);
 }
 
 TEST(zsh_arg_types) {
-    ParseResult r = kdl_parse_file("./test/fixtures/arg-types/input.kdl");
+    ParseResult r = parse_file("./test/fixtures/arg-types/input.kdl");
     ASSERT_NOT_NULL(r.ast);
-    ASSERT_INT_EQ(KDL_RESULT_OK, r.status);
+    ASSERT_INT_EQ(PARSER_RESULT_OK, r.status);
 
     char *expected_zsh =
         load_file_to_string("./test/fixtures/arg-types/expected.zsh");
@@ -40,13 +40,13 @@ TEST(zsh_arg_types) {
 
     free(expected_zsh);
     sb_free(&out);
-    kdl_free_result(&r);
+    free_result(&r);
 }
 
 TEST(zsh_flag_types) {
-    ParseResult r = kdl_parse_file("./test/fixtures/flag-types/input.kdl");
+    ParseResult r = parse_file("./test/fixtures/flag-types/input.kdl");
     ASSERT_NOT_NULL(r.ast);
-    ASSERT_INT_EQ(KDL_RESULT_OK, r.status);
+    ASSERT_INT_EQ(PARSER_RESULT_OK, r.status);
 
     char *expected_zsh =
         load_file_to_string("./test/fixtures/flag-types/expected.zsh");
@@ -60,5 +60,5 @@ TEST(zsh_flag_types) {
 
     free(expected_zsh);
     sb_free(&out);
-    kdl_free_result(&r);
+    free_result(&r);
 }
