@@ -14,22 +14,26 @@ static void indent(StringBuffer *out, int level) {
     }
 }
 
-static void gen_single_flag(Flag *f, const char *flag_name, StringBuffer *out) {
-    indent(out, 2);
-    sb_append(out, "'(");
-    if (f->short_name)
+static void gen_flag(Flag *f, StringBuffer *out) {
+    if (f->short_name && f->long_name) {
+        indent(out, 2);
+        sb_appendf(out, "'(%s %s)'{%s,%s}", f->short_name, f->long_name,
+                   f->short_name, f->long_name);
+    } else if (f->short_name) {
+        indent(out, 2);
         sb_append(out, f->short_name);
-    if (f->short_name && f->long_name)
-        sb_append(out, " ");
-    if (f->long_name)
+    } else if (f->long_name) {
+        indent(out, 2);
         sb_append(out, f->long_name);
-    sb_append(out, ")'");
+    } else {
+        return;
+    }
 
-    sb_append(out, flag_name);
     sb_append(out, "'");
 
-    if (f->choices->count > 0) {
-        sb_appendf(out, "=", f->help);
+    bool flag_expects_values = f->choices->count > 0 || f->value_name || f->run;
+    if (flag_expects_values) {
+        sb_append(out, "=");
     }
 
     if (f->help) {
@@ -63,13 +67,6 @@ static void gen_single_flag(Flag *f, const char *flag_name, StringBuffer *out) {
 
     free(flag_name_canonical);
     sb_append(out, "' \\\n");
-}
-
-static void gen_flag(Flag *f, StringBuffer *out) {
-    if (f->short_name)
-        gen_single_flag(f, f->short_name, out);
-    if (f->long_name)
-        gen_single_flag(f, f->long_name, out);
 }
 
 static void gen_cmd_function(ASTCommand *c, const char *func_name,
