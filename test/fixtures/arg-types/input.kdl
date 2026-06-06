@@ -28,3 +28,8 @@ cmd "generate" help="Generate a completion file" {
 cmd "exec" help="The action to perform" {
     arg "<precommand>" help="Executes a system command"
 }
+
+cmd "mv" help="Rename SOURCE to DEST, or move SOURCE(s) to DIRECTORY" {
+    arg "<file>" help="Source file"
+    arg "<file>" help="Destination file"
+}

@@ -118,6 +118,19 @@ function _mytool_exec() {
     return ret
 }
 
+function _mytool_mv() {
+    local context state state_descr line
+    typeset -A opt_args
+    local ret=1
+
+    _arguments -C \
+        '1:Source file:_files' \
+        '2:Destination file:_files' \
+        '*:: :->args' && ret=0
+
+    return ret
+}
+
 function _mytool() {
     local context state state_descr line
     typeset -A opt_args
@@ -137,6 +150,7 @@ function _mytool() {
                 'run:Create and run a new container from an image'
                 'generate:Generate a completion file'
                 'exec:The action to perform'
+                'mv:Rename SOURCE to DEST, or move SOURCE(s) to DIRECTORY'
             )
             _describe 'commands' choices && ret=0
             ;;
@@ -159,6 +173,9 @@ function _mytool() {
                     ;;
                 exec)
                     _mytool_exec "$@" && ret=0
+                    ;;
+                mv)
+                    _mytool_mv "$@" && ret=0
                     ;;
             esac
             ;;
