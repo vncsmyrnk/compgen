@@ -48,6 +48,12 @@ int main(int argc, char **argv) {
         case PARSER_RESULT_ERR_PARSE_FAILED:
             fprintf(stderr, "Error: unable to parse KDL file.\n");
             break;
+        case PARSER_RESULT_ERR_TOO_MANY_NODES:
+            fprintf(
+                stderr,
+                "Error: Node limit exceeded. You can configure the limit by "
+                "setting the COMPGEN_MAX_NODES environment variable.\n");
+            break;
         default:
             fprintf(stderr, "Error: unexpected failure.\n");
         }

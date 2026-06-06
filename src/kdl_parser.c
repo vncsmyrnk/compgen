@@ -54,6 +54,13 @@ ParseResult parse_file(const char *filepath) {
 
     NodeStack *node_stack = node_stack_init();
 
+    int node_count = 0;
+    int max_nodes = 200;
+    char *max_nodes_env = getenv("COMPGEN_MAX_NODES");
+    if (max_nodes_env) {
+        max_nodes = atoi(max_nodes_env);
+    }
+
     while ((event = kdl_parser_next_event(parser)) != NULL) {
         if (event->event == KDL_EVENT_EOF)
             break;
@@ -64,6 +71,12 @@ ParseResult parse_file(const char *filepath) {
 
         switch (event->event) {
         case KDL_EVENT_START_NODE:
+            node_count++;
+            if (node_count > max_nodes) {
+                res.status = PARSER_RESULT_ERR_TOO_MANY_NODES;
+                goto cleanup;
+            }
+
             snprintf(current_node_type, sizeof(current_node_type), "%.*s",
                      (int)event->name.len, event->name.data);
             if (strcmp(current_node_type, "cmd") == 0) {
@@ -219,6 +232,7 @@ ParseResult parse_file(const char *filepath) {
         }
     }
 
+cleanup:
     kdl_destroy_parser(parser);
     free(kdl_text);
     node_stack_free(node_stack);
