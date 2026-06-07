@@ -19,18 +19,35 @@ int get_line_number(const char *text, const char *ptr, long text_len) {
     return line;
 }
 
+#define MAX_KDL_FILE_SIZE (1024 * 1024) // 1MB
+
+static bool last_read_too_large = false;
+
 char *read_file(const char *filename, long *out_length) {
+    last_read_too_large = false;
     FILE *f = fopen(filename, "rb");
     if (!f)
         return NULL;
     fseek(f, 0, SEEK_END);
     long length = ftell(f);
+
+    if (length > MAX_KDL_FILE_SIZE) {
+        last_read_too_large = true;
+        fclose(f);
+        return NULL;
+    }
+
     if (out_length)
         *out_length = length;
     fseek(f, 0, SEEK_SET);
     char *buffer = malloc(length + 1);
     if (buffer) {
-        fread(buffer, 1, length, f);
+        size_t read = fread(buffer, 1, length, f);
+        if (read != (size_t)length) {
+            free(buffer);
+            fclose(f);
+            return NULL;
+        }
         buffer[length] = '\0';
     }
     fclose(f);
@@ -45,7 +62,11 @@ ParseResult parse_file(const char *filepath) {
     long kdl_text_len = 0;
     char *kdl_text = read_file(filepath, &kdl_text_len);
     if (!kdl_text) {
-        res.status = PARSER_RESULT_ERR_FILE_NOT_FOUND;
+        if (last_read_too_large) {
+            res.status = PARSER_RESULT_ERR_FILE_TOO_LARGE;
+        } else {
+            res.status = PARSER_RESULT_ERR_FILE_NOT_FOUND;
+        }
         return res;
     }
 
@@ -255,10 +276,6 @@ ParseResult parse_file(const char *filepath) {
                 ast_rebase(ast);
             }
             free(last_closed_node);
-            break;
-
-        case KDL_EVENT_PARSE_ERROR:
-            fprintf(stderr, "KDL Parse Error!\n");
             break;
 
         default:

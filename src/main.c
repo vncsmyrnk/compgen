@@ -40,7 +40,10 @@ int main(int argc, char **argv) {
     if (r.status != PARSER_RESULT_OK) {
         switch (r.status) {
         case PARSER_RESULT_ERR_FILE_NOT_FOUND:
-            fprintf(stderr, "Error: Could not read test.kdl\n");
+            fprintf(stderr, "Error: Could not read KDL file.\n");
+            break;
+        case PARSER_RESULT_ERR_FILE_TOO_LARGE:
+            fprintf(stderr, "Error: KDL file is too large (max 1MB).\n");
             break;
         case PARSER_RESULT_ERR_FAILED_TO_CREATE_PARSER:
             fprintf(stderr, "Error: Failed to create KDL parser.\n");

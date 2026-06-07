@@ -53,3 +53,25 @@ TEST(parser_node_limit_respected) {
 
     remove(test_kdl);
 }
+
+TEST(parser_file_too_large) {
+    const char *large_file = "test_large.kdl";
+    FILE *f = fopen(large_file, "wb");
+    if (!f)
+        return;
+
+    // Create a 1.1MB file
+    char *buf = calloc(1024, 1024);
+    if (buf) {
+        fwrite(buf, 1024, 1024, f);
+        fwrite(buf, 1024, 100, f);
+        free(buf);
+    }
+    fclose(f);
+
+    ParseResult res = parse_file(large_file);
+    ASSERT_INT_EQ(PARSER_RESULT_ERR_FILE_TOO_LARGE, res.status);
+
+    free_result(&res);
+    remove(large_file);
+}
