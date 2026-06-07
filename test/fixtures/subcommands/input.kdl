@@ -1,7 +1,7 @@
 name "mytool"
 help "A sample CLI tool for testing completions"
 
-cmd "backup" help="The action to perform" {
+cmd "backup" help="The action to perform" alias="bkp" {
     cmd "generate" help="help for generate"
     cmd "remote" help="help for remote" {
         cmd "list" help="help for list"
@@ -10,6 +10,6 @@ cmd "backup" help="The action to perform" {
 }
 
 cmd "containers" help="help for containers" {
-    cmd "list" help="help for list"
-    cmd "mount" help="help for list"
+    cmd "list" help="help for list" alias="ls"
+    cmd "mount" help="help for mount" alias="mnt"
 }

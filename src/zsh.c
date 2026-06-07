@@ -330,6 +330,12 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
         } else {
             sb_appendf(out, "'%s'\n", sub->cmd->name);
         }
+
+        if (sub->cmd->alias) {
+            indent(out, 4);
+            sb_appendf(out, "'%s:%s'\n", sub->cmd->alias, sub->cmd->help);
+        }
+
         sub = sub->sibling;
     }
 
@@ -349,11 +355,18 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
     sub = c->child;
     while (sub && sub->cmd) {
         indent(out, 4);
-        sb_appendf(out, "%s)\n", sub->cmd->name);
+        sb_appendf(out, "%s", sub->cmd->name);
+        if (sub->cmd->alias) {
+            sb_appendf(out, "|%s)\n", sub->cmd->alias);
+        } else {
+            sb_append(out, ")\n");
+        }
+
         indent(out, 5);
         sb_appendf(out, "_%s_%s \"$@\" && ret=0\n", func_name, sub->cmd->name);
         indent(out, 5);
         sb_append(out, ";;\n");
+
         sub = sub->sibling;
     }
 

@@ -142,6 +142,7 @@ void node_cmd_free(Command *cmd) {
     if (cmd) {
         free(cmd->name);
         free(cmd->help);
+        free(cmd->alias);
 
         Flag *f = cmd->flags;
         while (f) {

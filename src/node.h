@@ -40,13 +40,14 @@ typedef struct Arg {
     Choices *choices;
     char *run; // Shell command to generate choices dynamically
     bool multiple;
-    struct Arg *next; // Pointer to the next flag
+    struct Arg *next; // Pointer to the next arg
 } Arg;
 
 // Represents a CLI command or subcommand
 typedef struct Command {
-    char *name;         // e.g., "deploy"
-    char *help;         // e.g., "Deploy the system"
+    char *name; // e.g., "deploy"
+    char *help; // e.g., "Deploy the system"
+    char *alias;
     struct Flag *flags; // Linked list of flags
     struct Arg *args;   // Linked list of arguments
 } Command;

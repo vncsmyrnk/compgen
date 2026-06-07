@@ -228,6 +228,10 @@ ParseResult parse_file(const char *filepath) {
                                current_flag) {
                         current_flag->run = string_dup(prop_val);
                     }
+                } else if (strcmp(prop_name, "alias") == 0) {
+                    if (strcmp(current_node_type, "cmd") == 0 && current_cmd) {
+                        current_cmd->alias = string_dup(prop_val);
+                    }
                 }
             } else if (event->value.type == KDL_TYPE_BOOLEAN) {
                 if (strcmp(prop_name, "global") == 0 &&

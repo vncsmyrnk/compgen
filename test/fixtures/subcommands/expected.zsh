@@ -137,16 +137,18 @@ function _mytool_containers() {
             local -a choices
             choices=(
                 'list:help for list'
-                'mount:help for list'
+                'ls:help for list'
+                'mount:help for mount'
+                'mnt:help for mount'
             )
             _describe 'commands' choices && ret=0
             ;;
         args)
             case $line[1] in
-                list)
+                list|ls)
                     _mytool_containers_list "$@" && ret=0
                     ;;
-                mount)
+                mount|mnt)
                     _mytool_containers_mount "$@" && ret=0
                     ;;
             esac
@@ -170,13 +172,14 @@ function _mytool() {
             local -a choices
             choices=(
                 'backup:The action to perform'
+                'bkp:The action to perform'
                 'containers:help for containers'
             )
             _describe 'commands' choices && ret=0
             ;;
         args)
             case $line[1] in
-                backup)
+                backup|bkp)
                     _mytool_backup "$@" && ret=0
                     ;;
                 containers)
