@@ -14,6 +14,7 @@ StringBuffer sb_create(void);
 void sb_free(StringBuffer *sb);
 void sb_append(StringBuffer *sb, const char *str);
 void sb_append_char(StringBuffer *sb, char c);
+void sb_append_shell_escaped(StringBuffer *sb, const char *str);
 void sb_appendf(StringBuffer *sb, const char *fmt, ...);
 void sb_slice(StringBuffer *sb, int start, int end);
 

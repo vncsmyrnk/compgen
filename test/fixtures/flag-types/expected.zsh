@@ -17,7 +17,7 @@ function _mytool_checkout() {
         '(-d --dir)'{-d,--dir}'=[Dir flag example]:dir:_files -/' \
         '(-f --file)'{-f,--file}'=[File flag example]:file:_files' \
         --ours'[When checking out paths from the index, check out stage #2 for unmerged paths.]' \
-        '(-t --track)'{-t,--track}'=[When creating a new branch, set up "upstream" configuration]:ref:->action_ref' \
+        '(-t --track)'{-t,--track}'=[When creating a new branch, set up  upstream  configuration]:ref:->action_ref' \
         '(-v --version)'{-v,--version}'[Print version]' \
         '(-h --help)'{-h,--help}'[Display help]' \
         '*:: :->args' && ret=0

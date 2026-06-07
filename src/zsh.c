@@ -54,7 +54,18 @@ static void gen_flag(Flag *f, StringBuffer *out) {
     }
 
     if (f->help) {
-        sb_appendf(out, "[%s]", f->help);
+        sb_append(out, "[");
+        // We need to escape inside the brackets for _arguments.
+        // ZSH's _arguments is notoriously complex. For now, we strip quotes.
+        for (const char *c = f->help; *c != '\0'; c++) {
+            if (*c == '\'' || *c == '"' || *c == '[' || *c == ']' ||
+                *c == ':') {
+                sb_append_char(out, ' ');
+            } else {
+                sb_append_char(out, *c);
+            }
+        }
+        sb_append(out, "]");
     }
 
     char *flag_name_canonical = node_flag_name_canonical(f);
@@ -110,7 +121,9 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
         sub = sub->sibling;
     }
 
-    sb_appendf(out, "function _%s() {\n", func_name);
+    sb_append(out, "function _");
+    sb_append(out, func_name);
+    sb_append(out, "() {\n");
 
     indent(out, 1);
     sb_append(out, "local context state state_descr line\n");
@@ -251,7 +264,8 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
                 indent(out, 3);
                 sb_append(out, "choices=(");
                 for (int i = 0; i < a->choices->count; i++) {
-                    sb_appendf(out, "\"%s\" ", a->choices->values[i]);
+                    sb_append_shell_escaped(out, a->choices->values[i]);
+                    sb_append(out, " ");
                 }
                 sb_slice(out, 0, -1);
                 sb_append(out, ")\n");
@@ -325,15 +339,28 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
     sub = c->child;
     while (sub && sub->cmd) {
         indent(out, 4);
+        // We use sb_append_shell_escaped for the whole 'name:help' item
+        StringBuffer item = sb_create();
+        sb_append(&item, sub->cmd->name);
         if (sub->cmd->help) {
-            sb_appendf(out, "'%s:%s'\n", sub->cmd->name, sub->cmd->help);
-        } else {
-            sb_appendf(out, "'%s'\n", sub->cmd->name);
+            sb_append(&item, ":");
+            sb_append(&item, sub->cmd->help);
         }
+        sb_append_shell_escaped(out, item.data);
+        sb_free(&item);
+        sb_append(out, "\n");
 
         if (sub->cmd->alias) {
             indent(out, 4);
-            sb_appendf(out, "'%s:%s'\n", sub->cmd->alias, sub->cmd->help);
+            StringBuffer alias_item = sb_create();
+            sb_append(&alias_item, sub->cmd->alias);
+            if (sub->cmd->help) {
+                sb_append(&alias_item, ":");
+                sb_append(&alias_item, sub->cmd->help);
+            }
+            sb_append_shell_escaped(out, alias_item.data);
+            sb_free(&alias_item);
+            sb_append(out, "\n");
         }
 
         sub = sub->sibling;
@@ -355,15 +382,21 @@ static void gen_cmd_function(ASTCommand *c, const char *func_name,
     sub = c->child;
     while (sub && sub->cmd) {
         indent(out, 4);
-        sb_appendf(out, "%s", sub->cmd->name);
+        sb_append(out, sub->cmd->name);
         if (sub->cmd->alias) {
-            sb_appendf(out, "|%s)\n", sub->cmd->alias);
+            sb_append(out, "|");
+            sb_append(out, sub->cmd->alias);
+            sb_append(out, ")\n");
         } else {
             sb_append(out, ")\n");
         }
 
         indent(out, 5);
-        sb_appendf(out, "_%s_%s \"$@\" && ret=0\n", func_name, sub->cmd->name);
+        sb_append(out, "_");
+        sb_append(out, func_name);
+        sb_append(out, "_");
+        sb_append(out, sub->cmd->name);
+        sb_append(out, " \"$@\" && ret=0\n");
         indent(out, 5);
         sb_append(out, ";;\n");
 
@@ -391,7 +424,10 @@ void generate(AST *ast, StringBuffer *out) {
     char *name = root_ast_cmd->cmd->name;
     NodeList *global_flags_list = node_list_init();
 
-    sb_appendf(out, "#compdef %s\n\n", name);
+    sb_append(out, "#compdef ");
+    sb_append(out, name);
+    sb_append(out, "\n\n");
+
     sb_append(out, "# This script was generated automatically\n\n");
 
     // Start the recursive generation
@@ -399,11 +435,19 @@ void generate(AST *ast, StringBuffer *out) {
     node_list_free(global_flags_list);
 
     // The Execution Footer
-    sb_appendf(out, "if [ \"$funcstack[1]\" = \"_%s\" ]; then\n", name);
+    sb_append(out, "if [ \"$funcstack[1]\" = \"_");
+    sb_append(out, name);
+    sb_append(out, "\" ]; then\n");
     indent(out, 1);
-    sb_appendf(out, "_%s \"$@\"\n", name);
+    sb_append(out, "_");
+    sb_append(out, name);
+    sb_append(out, " \"$@\"\n");
     sb_append(out, "else\n");
     indent(out, 1);
-    sb_appendf(out, "compdef _%s %s\n", name, name);
+    sb_append(out, "compdef _");
+    sb_append(out, name);
+    sb_append(out, " ");
+    sb_append(out, name);
+    sb_append(out, "\n");
     sb_append(out, "fi\n");
 }

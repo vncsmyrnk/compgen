@@ -93,7 +93,7 @@ function _mytool_generate() {
     case $state in
         action_shell)
             local -a choices
-            choices=("zsh" "bash")
+            choices=('zsh' 'bash')
             compadd -a choices && ret=0
             ;;
     esac

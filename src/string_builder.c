@@ -70,6 +70,24 @@ void sb_append_char(StringBuffer *sb, char c) {
     sb->data[sb->len] = '\0';
 }
 
+void sb_append_shell_escaped(StringBuffer *sb, const char *str) {
+    if (!str) {
+        sb_append(sb, "''");
+        return;
+    }
+
+    sb_append_char(sb, '\'');
+    for (const char *c = str; *c != '\0'; c++) {
+        if (*c == '\'') {
+            // Close current quote, add escaped quote, reopen quote
+            sb_append(sb, "'\\''");
+        } else {
+            sb_append_char(sb, *c);
+        }
+    }
+    sb_append_char(sb, '\'');
+}
+
 void sb_appendf(StringBuffer *sb, const char *fmt, ...) {
     va_list args;
 
